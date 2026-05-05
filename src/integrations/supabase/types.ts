@@ -14,7 +14,231 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          region: string | null
+          type: string | null
+          updated_at: string
+          vat_number: string | null
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          region?: string | null
+          type?: string | null
+          updated_at?: string
+          vat_number?: string | null
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          region?: string | null
+          type?: string | null
+          updated_at?: string
+          vat_number?: string | null
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      connections: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          participant_a: string
+          participant_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          participant_a: string
+          participant_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          participant_a?: string
+          participant_b?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_id: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          region: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          region?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          region?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publications: {
+        Row: {
+          available_from: string | null
+          budget: number | null
+          company_id: string | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          hourly_rate: number | null
+          id: string
+          location: string | null
+          owner_id: string
+          region: string | null
+          status: Database["public"]["Enums"]["publication_status"]
+          tags: string[]
+          title: string
+          type: Database["public"]["Enums"]["publication_type"]
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          available_from?: string | null
+          budget?: number | null
+          company_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          location?: string | null
+          owner_id: string
+          region?: string | null
+          status?: Database["public"]["Enums"]["publication_status"]
+          tags?: string[]
+          title: string
+          type: Database["public"]["Enums"]["publication_type"]
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          available_from?: string | null
+          budget?: number | null
+          company_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          location?: string | null
+          owner_id?: string
+          region?: string | null
+          status?: Database["public"]["Enums"]["publication_status"]
+          tags?: string[]
+          title?: string
+          type?: Database["public"]["Enums"]["publication_type"]
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +247,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      publication_status: "actief" | "gesloten" | "verlopen" | "in_gesprek"
+      publication_type: "opdracht" | "capaciteit"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +375,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      publication_status: ["actief", "gesloten", "verlopen", "in_gesprek"],
+      publication_type: ["opdracht", "capaciteit"],
+    },
   },
 } as const
