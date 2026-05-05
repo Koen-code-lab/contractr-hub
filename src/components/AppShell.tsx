@@ -52,14 +52,15 @@ export function AppShell() {
               <Link
                 key={item.to}
                 to={item.to}
+                title={item.label}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   active
                     ? "bg-accent text-accent-foreground font-semibold"
                     : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-white"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="hidden md:inline">{item.label}</span>
               </Link>
             );
           })}
