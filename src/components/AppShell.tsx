@@ -34,12 +34,12 @@ export function AppShell() {
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen border-r border-sidebar-border">
-        <div className="px-6 py-6 flex items-center gap-2 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+      <aside className="flex w-20 md:w-64 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen border-r border-sidebar-border shrink-0">
+        <div className="px-4 md:px-6 py-6 flex items-center gap-2 border-b border-sidebar-border">
+          <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
             <Construction className="w-5 h-5 text-accent-foreground" />
           </div>
-          <div>
+          <div className="hidden md:block">
             <div className="font-display font-bold text-lg tracking-tight text-white">CONTRACTR</div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60">Bouw netwerk</div>
           </div>
@@ -52,19 +52,20 @@ export function AppShell() {
               <Link
                 key={item.to}
                 to={item.to}
+                title={item.label}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   active
                     ? "bg-accent text-accent-foreground font-semibold"
                     : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-white"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="hidden md:inline">{item.label}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border hidden md:block">
           <div className="rounded-xl bg-sidebar-accent p-4">
             <div className="text-xs text-sidebar-foreground/60 uppercase tracking-wider">Pro tip</div>
             <div className="text-sm mt-1 text-white">Verbind je profiel om sneller matches te vinden.</div>
@@ -77,7 +78,7 @@ export function AppShell() {
         {/* Topbar */}
         <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border">
           <div className="h-16 px-4 lg:px-8 flex items-center gap-4">
-            <div className="lg:hidden font-display font-bold tracking-tight">CONTRACTR</div>
+            <div className="hidden"></div>
             <div className="flex-1 max-w-xl">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
