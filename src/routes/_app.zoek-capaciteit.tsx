@@ -8,12 +8,12 @@ export const Route = createFileRoute("/_app/zoek-capaciteit")({
 });
 
 const profielen = [
-  { naam: "De Smet Construct", specialiteit: "Kraanverhuur & Hijsen", regio: "Antwerpen", rating: 4.9, reviews: 124, prijs: "€ 95/u", beschikbaar: "Direct" },
-  { naam: "Vandemoortele BV", specialiteit: "Metselwerken", regio: "Gent", rating: 4.8, reviews: 87, prijs: "€ 65/u", beschikbaar: "12/05" },
+  { naam: "De Smet Construct", specialiteit: "Kraanverhuur & hijswerken", regio: "Antwerpen", rating: 4.9, reviews: 124, prijs: "€ 95/u", beschikbaar: "Direct" },
+  { naam: "Vandemoortele Bouw", specialiteit: "Metselwerken", regio: "Gent", rating: 4.8, reviews: 87, prijs: "€ 65/u", beschikbaar: "12/05" },
   { naam: "ElectroPro Belgium", specialiteit: "Elektriciteit BA5", regio: "Brussel", rating: 5.0, reviews: 56, prijs: "€ 78/u", beschikbaar: "Direct" },
   { naam: "Dakwerken Janssens", specialiteit: "Industriële daken", regio: "Mechelen", rating: 4.7, reviews: 42, prijs: "€ 70/u", beschikbaar: "20/05" },
-  { naam: "Beton Express", specialiteit: "Funderingen", regio: "Luik", rating: 4.6, reviews: 78, prijs: "€ 110/u", beschikbaar: "Direct" },
-  { naam: "Tegelwerken Coppens", specialiteit: "Afwerking", regio: "Leuven", rating: 4.9, reviews: 61, prijs: "€ 55/u", beschikbaar: "15/05" },
+  { naam: "Beton Express Liège", specialiteit: "Funderingen", regio: "Luik", rating: 4.6, reviews: 78, prijs: "€ 110/u", beschikbaar: "Direct" },
+  { naam: "Tegelwerken Coppens", specialiteit: "Afwerking & tegelwerk", regio: "Leuven", rating: 4.9, reviews: 61, prijs: "€ 55/u", beschikbaar: "15/05" },
 ];
 
 const specialiteiten = ["Funderingen", "Metselwerken", "Dakwerken", "Elektriciteit", "Sanitair", "Afwerking", "Hijsen / Kranen", "Wegenwerken"];
