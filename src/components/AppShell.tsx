@@ -11,8 +11,6 @@ import {
   User,
   Settings,
   Bell,
-  ChevronDown,
-  Construction,
 } from "lucide-react";
 
 const nav = [
