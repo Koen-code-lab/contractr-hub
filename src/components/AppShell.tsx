@@ -31,6 +31,15 @@ const nav = [
 
 export function AppShell() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const fullName = (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
+  const initials = (fullName || user?.email || "U")
+    .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("") || "U";
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/login", replace: true });
+  };
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
