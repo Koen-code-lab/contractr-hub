@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
+import { FileUploadSection } from "@/components/FileUploadSection";
 import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_app/plaats-opdracht")({
