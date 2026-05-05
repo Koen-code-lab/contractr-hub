@@ -21,18 +21,18 @@ const publicaties = [
 ];
 
 const opportuniteiten = [
-  { titel: "Funderingswerken nieuwbouw", bedrijf: "BAM Belgium", locatie: "Antwerpen", budget: "€ 240.000", match: 96 },
-  { titel: "Dakwerken industriegebouw", bedrijf: "Willemen Group", locatie: "Mechelen", budget: "€ 85.000", match: 92 },
-  { titel: "Wegenwerken N9 segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", match: 88 },
-  { titel: "Renovatie kantoorpand", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1.2M", match: 84 },
+  { titel: "Funderingswerken nieuwbouw Eilandje", bedrijf: "BAM Contractors", locatie: "Antwerpen", budget: "€ 240.000", match: "Past bij jouw specialisatie" },
+  { titel: "Dakwerken industriegebouw Zaventem", bedrijf: "Willemen Groep", locatie: "Mechelen", budget: "€ 85.000", match: "Goede match" },
+  { titel: "Wegenwerken N9 — segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", match: "Relevante match" },
+  { titel: "Renovatie kantoorpand Zavel", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1,2M", match: "Goede match" },
 ];
 
 function Dashboard() {
   return (
     <>
       <PageHeader
-        title="Welkom terug, Jan"
-        subtitle="Een overzicht van je publicaties, regio-activiteit en nieuwe opportuniteiten."
+        title="Welkom bij CONTRACTR"
+        subtitle="Het netwerk voor capaciteit en opdrachten in de Belgische bouwsector."
         actions={
           <>
             <Link to="/plaats-opdracht" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
@@ -126,7 +126,7 @@ function Dashboard() {
                 <Briefcase className="w-5 h-5" />
               </div>
               <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground font-semibold">
-                {o.match}% match
+                {o.match}
               </span>
             </div>
             <h4 className="font-semibold mt-4 leading-tight">{o.titel}</h4>
@@ -138,7 +138,7 @@ function Dashboard() {
               <span className="text-sm font-bold">{o.budget}</span>
             </div>
             <Link to="/bekijk-opdrachten" className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold">
-              Bied nu
+              Bekijk
             </Link>
           </div>
         ))}

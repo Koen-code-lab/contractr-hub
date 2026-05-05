@@ -11,7 +11,7 @@ function PlaatsOpdracht() {
     <>
       <PageHeader
         title="Plaats opdracht"
-        subtitle="Beschrijf je project en ontvang biedingen van geverifieerde bouwpartners."
+        subtitle="Beschrijf je project en vind geverifieerde bouwpartners in jouw regio."
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -69,10 +69,10 @@ function PlaatsOpdracht() {
           </div>
           <h3 className="font-display font-semibold text-lg">Snel matchen</h3>
           <p className="text-sm opacity-80 mt-2">
-            Gemiddeld ontvang je binnen 48 uur 5+ biedingen van geverifieerde partners in jouw regio.
+            Gemiddeld ontvang je binnen 48 uur reacties van 5+ geverifieerde partners in jouw regio.
           </p>
           <div className="border-t border-white/10 mt-5 pt-5 grid grid-cols-2 gap-4 text-center">
-            <div><div className="text-2xl font-display font-bold">48u</div><div className="text-xs opacity-70">Eerste bod</div></div>
+            <div><div className="text-2xl font-display font-bold">48u</div><div className="text-xs opacity-70">Eerste reactie</div></div>
             <div><div className="text-2xl font-display font-bold">98%</div><div className="text-xs opacity-70">Geverifieerd</div></div>
           </div>
         </aside>

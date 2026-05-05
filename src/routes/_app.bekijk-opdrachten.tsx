@@ -8,17 +8,17 @@ export const Route = createFileRoute("/_app/bekijk-opdrachten")({
 });
 
 const opdrachten = [
-  { titel: "Funderingswerken nieuwbouw kantoor", bedrijf: "BAM Belgium", locatie: "Antwerpen", budget: "€ 240.000", deadline: "15/06/2026", tags: ["Funderingen", "Beton", "6 weken"], status: "Open" },
-  { titel: "Renovatie historisch kantoorpand", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1.2M", deadline: "30/09/2026", tags: ["Renovatie", "Patrimonium"], status: "Open" },
-  { titel: "Dakwerken industriegebouw 8.000m²", bedrijf: "Willemen Group", locatie: "Mechelen", budget: "€ 85.000", deadline: "20/05/2026", tags: ["Dakwerken", "Industrieel"], status: "Onderhandeling" },
-  { titel: "Wegenwerken N9 segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", deadline: "01/08/2026", tags: ["Infrastructuur", "Asfalt"], status: "Open" },
-  { titel: "Elektrische installatie woontoren", bedrijf: "Immobel", locatie: "Luik", budget: "€ 320.000", deadline: "10/07/2026", tags: ["Elektriciteit", "BA5"], status: "Bijna gesloten" },
+  { titel: "Funderingswerken nieuwbouw kantoor Eilandje", bedrijf: "BAM Contractors", locatie: "Antwerpen", budget: "€ 240.000", deadline: "15/06/2026", tags: ["Funderingen", "Beton", "6 weken"], status: "Open" },
+  { titel: "Renovatie historisch kantoorpand Zavel", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1,2M", deadline: "30/09/2026", tags: ["Renovatie", "Patrimonium"], status: "Open" },
+  { titel: "Dakwerken industriegebouw 8.000 m²", bedrijf: "Willemen Groep", locatie: "Mechelen", budget: "€ 85.000", deadline: "20/05/2026", tags: ["Dakwerken", "Industrieel"], status: "In gesprek" },
+  { titel: "Wegenwerken N9 — segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", deadline: "01/08/2026", tags: ["Infrastructuur", "Asfalt"], status: "Open" },
+  { titel: "Elektrische installatie woontoren Médiacité", bedrijf: "Galère", locatie: "Luik", budget: "€ 320.000", deadline: "10/07/2026", tags: ["Elektriciteit", "BA5"], status: "Binnenkort gesloten" },
 ];
 
 const statusColor: Record<string, string> = {
   "Open": "text-success",
-  "Onderhandeling": "text-accent-foreground",
-  "Bijna gesloten": "text-destructive",
+  "In gesprek": "text-accent-foreground",
+  "Binnenkort gesloten": "text-destructive",
 };
 
 function BekijkOpdrachten() {
@@ -29,7 +29,7 @@ function BekijkOpdrachten() {
         subtitle="Ontdek lopende aanbestedingen en projecten waar je op kan bieden."
         actions={
           <div className="flex gap-2 flex-wrap">
-            {["Alle", "Open", "Onderhandeling", "Gewonnen"].map((t, i) => (
+            {["Alle", "Open", "In gesprek", "Toegewezen"].map((t, i) => (
               <button key={t} className={`px-4 py-2 rounded-full text-sm font-medium ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"}`}>
                 {t}
               </button>
@@ -68,7 +68,7 @@ function BekijkOpdrachten() {
                     <div className="text-xs text-muted-foreground">Budget</div>
                     <div className="text-xl font-display font-bold">{o.budget}</div>
                   </div>
-                  <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bied nu</button>
+                  <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</button>
                 </div>
               </div>
               <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">
