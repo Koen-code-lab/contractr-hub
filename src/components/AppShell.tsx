@@ -34,7 +34,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen border-r border-sidebar-border">
+      <aside className="flex w-20 md:w-64 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen border-r border-sidebar-border shrink-0">
         <div className="px-6 py-6 flex items-center gap-2 border-b border-sidebar-border">
           <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
             <Construction className="w-5 h-5 text-accent-foreground" />
