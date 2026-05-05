@@ -21,10 +21,10 @@ const publicaties = [
 ];
 
 const opportuniteiten = [
-  { titel: "Funderingswerken nieuwbouw", bedrijf: "BAM Belgium", locatie: "Antwerpen", budget: "€ 240.000", match: 96 },
-  { titel: "Dakwerken industriegebouw", bedrijf: "Willemen Group", locatie: "Mechelen", budget: "€ 85.000", match: 92 },
-  { titel: "Wegenwerken N9 segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", match: 88 },
-  { titel: "Renovatie kantoorpand", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1.2M", match: 84 },
+  { titel: "Funderingswerken nieuwbouw Eilandje", bedrijf: "BAM Contractors", locatie: "Antwerpen", budget: "€ 240.000", match: "Past bij jouw specialisatie" },
+  { titel: "Dakwerken industriegebouw Zaventem", bedrijf: "Willemen Groep", locatie: "Mechelen", budget: "€ 85.000", match: "Goede match" },
+  { titel: "Wegenwerken N9 — segment 2A", bedrijf: "Aswebo", locatie: "Gent", budget: "€ 540.000", match: "Relevante match" },
+  { titel: "Renovatie kantoorpand Zavel", bedrijf: "CIT Blaton", locatie: "Brussel", budget: "€ 1,2M", match: "Goede match" },
 ];
 
 function Dashboard() {
