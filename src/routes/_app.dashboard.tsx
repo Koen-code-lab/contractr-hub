@@ -31,8 +31,8 @@ function Dashboard() {
   return (
     <>
       <PageHeader
-        title="Welkom terug, Jan"
-        subtitle="Een overzicht van je publicaties, regio-activiteit en nieuwe opportuniteiten."
+        title="Welkom bij CONTRACTR"
+        subtitle="Het netwerk voor capaciteit en opdrachten in de Belgische bouwsector."
         actions={
           <>
             <Link to="/plaats-opdracht" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
