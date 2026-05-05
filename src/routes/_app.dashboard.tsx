@@ -126,7 +126,7 @@ function Dashboard() {
                 <Briefcase className="w-5 h-5" />
               </div>
               <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground font-semibold">
-                {o.match}% match
+                {o.match}
               </span>
             </div>
             <h4 className="font-semibold mt-4 leading-tight">{o.titel}</h4>
@@ -138,7 +138,7 @@ function Dashboard() {
               <span className="text-sm font-bold">{o.budget}</span>
             </div>
             <Link to="/bekijk-opdrachten" className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold">
-              Bied nu
+              Bekijk
             </Link>
           </div>
         ))}
