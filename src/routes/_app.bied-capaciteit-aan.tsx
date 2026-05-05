@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
-import { Upload, HardHat } from "lucide-react";
+import { FileUploadSection } from "@/components/FileUploadSection";
+import { HardHat } from "lucide-react";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
