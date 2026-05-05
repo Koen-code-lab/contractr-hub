@@ -65,7 +65,7 @@ export function AppShell() {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border hidden md:block">
           <div className="rounded-xl bg-sidebar-accent p-4">
             <div className="text-xs text-sidebar-foreground/60 uppercase tracking-wider">Pro tip</div>
             <div className="text-sm mt-1 text-white">Verbind je profiel om sneller matches te vinden.</div>
