@@ -12,9 +12,8 @@ import {
   Settings,
   Bell,
   ChevronDown,
-  HelmetIcon,
+  Construction,
 } from "lucide-react";
-import { Construction } from "lucide-react";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
