@@ -20,9 +20,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Listener first
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+      // Ensure a profiles row exists for the signed-in user.
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && s?.user) {
+        const u = s.user;
+        const fullName =
+          (u.user_metadata as { full_name?: string } | undefined)?.full_name ??
+          u.email ??
+          null;
+        // Defer to avoid blocking the auth callback.
+        setTimeout(() => {
+          void supabase
+            .from("profiles")
+            .upsert({ id: u.id, full_name: fullName }, { onConflict: "id" });
+        }, 0);
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
