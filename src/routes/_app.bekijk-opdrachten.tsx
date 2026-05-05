@@ -68,7 +68,7 @@ function BekijkOpdrachten() {
                     <div className="text-xs text-muted-foreground">Budget</div>
                     <div className="text-xl font-display font-bold">{o.budget}</div>
                   </div>
-                  <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bied nu</button>
+                  <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</button>
                 </div>
               </div>
               <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">
