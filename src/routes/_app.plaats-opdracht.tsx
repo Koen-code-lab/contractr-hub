@@ -11,7 +11,7 @@ function PlaatsOpdracht() {
     <>
       <PageHeader
         title="Plaats opdracht"
-        subtitle="Beschrijf je project en ontvang biedingen van geverifieerde bouwpartners."
+        subtitle="Beschrijf je project en vind geverifieerde bouwpartners in jouw regio."
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
