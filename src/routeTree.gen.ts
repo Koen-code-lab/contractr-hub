@@ -9,38 +9,197 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppZoekCapaciteitRouteImport } from './routes/_app.zoek-capaciteit'
+import { Route as AppPlaatsOpdrachtRouteImport } from './routes/_app.plaats-opdracht'
+import { Route as AppMijnPublicatiesRouteImport } from './routes/_app.mijn-publicaties'
+import { Route as AppMijnProfielRouteImport } from './routes/_app.mijn-profiel'
+import { Route as AppMijnNetwerkRouteImport } from './routes/_app.mijn-netwerk'
+import { Route as AppInstellingenRouteImport } from './routes/_app.instellingen'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppBiedCapaciteitAanRouteImport } from './routes/_app.bied-capaciteit-aan'
+import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
+import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppZoekCapaciteitRoute = AppZoekCapaciteitRouteImport.update({
+  id: '/zoek-capaciteit',
+  path: '/zoek-capaciteit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaatsOpdrachtRoute = AppPlaatsOpdrachtRouteImport.update({
+  id: '/plaats-opdracht',
+  path: '/plaats-opdracht',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMijnPublicatiesRoute = AppMijnPublicatiesRouteImport.update({
+  id: '/mijn-publicaties',
+  path: '/mijn-publicaties',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMijnProfielRoute = AppMijnProfielRouteImport.update({
+  id: '/mijn-profiel',
+  path: '/mijn-profiel',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMijnNetwerkRoute = AppMijnNetwerkRouteImport.update({
+  id: '/mijn-netwerk',
+  path: '/mijn-netwerk',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInstellingenRoute = AppInstellingenRouteImport.update({
+  id: '/instellingen',
+  path: '/instellingen',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBiedCapaciteitAanRoute = AppBiedCapaciteitAanRouteImport.update({
+  id: '/bied-capaciteit-aan',
+  path: '/bied-capaciteit-aan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBerichtenRoute = AppBerichtenRouteImport.update({
+  id: '/berichten',
+  path: '/berichten',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBekijkOpdrachtenRoute = AppBekijkOpdrachtenRouteImport.update({
+  id: '/bekijk-opdrachten',
+  path: '/bekijk-opdrachten',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
+  '/berichten': typeof AppBerichtenRoute
+  '/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/instellingen': typeof AppInstellingenRoute
+  '/mijn-netwerk': typeof AppMijnNetwerkRoute
+  '/mijn-profiel': typeof AppMijnProfielRoute
+  '/mijn-publicaties': typeof AppMijnPublicatiesRoute
+  '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
+  '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
+  '/berichten': typeof AppBerichtenRoute
+  '/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/instellingen': typeof AppInstellingenRoute
+  '/mijn-netwerk': typeof AppMijnNetwerkRoute
+  '/mijn-profiel': typeof AppMijnProfielRoute
+  '/mijn-publicaties': typeof AppMijnPublicatiesRoute
+  '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
+  '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_app/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
+  '/_app/berichten': typeof AppBerichtenRoute
+  '/_app/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/instellingen': typeof AppInstellingenRoute
+  '/_app/mijn-netwerk': typeof AppMijnNetwerkRoute
+  '/_app/mijn-profiel': typeof AppMijnProfielRoute
+  '/_app/mijn-publicaties': typeof AppMijnPublicatiesRoute
+  '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
+  '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/bekijk-opdrachten'
+    | '/berichten'
+    | '/bied-capaciteit-aan'
+    | '/dashboard'
+    | '/instellingen'
+    | '/mijn-netwerk'
+    | '/mijn-profiel'
+    | '/mijn-publicaties'
+    | '/plaats-opdracht'
+    | '/zoek-capaciteit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/bekijk-opdrachten'
+    | '/berichten'
+    | '/bied-capaciteit-aan'
+    | '/dashboard'
+    | '/instellingen'
+    | '/mijn-netwerk'
+    | '/mijn-profiel'
+    | '/mijn-publicaties'
+    | '/plaats-opdracht'
+    | '/zoek-capaciteit'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/bekijk-opdrachten'
+    | '/_app/berichten'
+    | '/_app/bied-capaciteit-aan'
+    | '/_app/dashboard'
+    | '/_app/instellingen'
+    | '/_app/mijn-netwerk'
+    | '/_app/mijn-profiel'
+    | '/_app/mijn-publicaties'
+    | '/_app/plaats-opdracht'
+    | '/_app/zoek-capaciteit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +207,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/zoek-capaciteit': {
+      id: '/_app/zoek-capaciteit'
+      path: '/zoek-capaciteit'
+      fullPath: '/zoek-capaciteit'
+      preLoaderRoute: typeof AppZoekCapaciteitRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/plaats-opdracht': {
+      id: '/_app/plaats-opdracht'
+      path: '/plaats-opdracht'
+      fullPath: '/plaats-opdracht'
+      preLoaderRoute: typeof AppPlaatsOpdrachtRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mijn-publicaties': {
+      id: '/_app/mijn-publicaties'
+      path: '/mijn-publicaties'
+      fullPath: '/mijn-publicaties'
+      preLoaderRoute: typeof AppMijnPublicatiesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mijn-profiel': {
+      id: '/_app/mijn-profiel'
+      path: '/mijn-profiel'
+      fullPath: '/mijn-profiel'
+      preLoaderRoute: typeof AppMijnProfielRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mijn-netwerk': {
+      id: '/_app/mijn-netwerk'
+      path: '/mijn-netwerk'
+      fullPath: '/mijn-netwerk'
+      preLoaderRoute: typeof AppMijnNetwerkRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/instellingen': {
+      id: '/_app/instellingen'
+      path: '/instellingen'
+      fullPath: '/instellingen'
+      preLoaderRoute: typeof AppInstellingenRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bied-capaciteit-aan': {
+      id: '/_app/bied-capaciteit-aan'
+      path: '/bied-capaciteit-aan'
+      fullPath: '/bied-capaciteit-aan'
+      preLoaderRoute: typeof AppBiedCapaciteitAanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/berichten': {
+      id: '/_app/berichten'
+      path: '/berichten'
+      fullPath: '/berichten'
+      preLoaderRoute: typeof AppBerichtenRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bekijk-opdrachten': {
+      id: '/_app/bekijk-opdrachten'
+      path: '/bekijk-opdrachten'
+      fullPath: '/bekijk-opdrachten'
+      preLoaderRoute: typeof AppBekijkOpdrachtenRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppBekijkOpdrachtenRoute: typeof AppBekijkOpdrachtenRoute
+  AppBerichtenRoute: typeof AppBerichtenRoute
+  AppBiedCapaciteitAanRoute: typeof AppBiedCapaciteitAanRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppInstellingenRoute: typeof AppInstellingenRoute
+  AppMijnNetwerkRoute: typeof AppMijnNetwerkRoute
+  AppMijnProfielRoute: typeof AppMijnProfielRoute
+  AppMijnPublicatiesRoute: typeof AppMijnPublicatiesRoute
+  AppPlaatsOpdrachtRoute: typeof AppPlaatsOpdrachtRoute
+  AppZoekCapaciteitRoute: typeof AppZoekCapaciteitRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppBekijkOpdrachtenRoute: AppBekijkOpdrachtenRoute,
+  AppBerichtenRoute: AppBerichtenRoute,
+  AppBiedCapaciteitAanRoute: AppBiedCapaciteitAanRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppInstellingenRoute: AppInstellingenRoute,
+  AppMijnNetwerkRoute: AppMijnNetwerkRoute,
+  AppMijnProfielRoute: AppMijnProfielRoute,
+  AppMijnPublicatiesRoute: AppMijnPublicatiesRoute,
+  AppPlaatsOpdrachtRoute: AppPlaatsOpdrachtRoute,
+  AppZoekCapaciteitRoute: AppZoekCapaciteitRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
