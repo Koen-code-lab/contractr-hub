@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Send, Search, Paperclip } from "lucide-react";
 import { useConversations, useMessages } from "@/lib/queries";
-import { EmptyState, LoadingState, ErrorState } from "@/components/States";
+import { EmptyState } from "@/components/States";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
