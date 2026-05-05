@@ -54,11 +54,7 @@ function BiedCapaciteitAan() {
             <label className="text-sm font-medium block mb-2">Beschrijving</label>
             <textarea rows={5} className="w-full px-4 py-3 rounded-xl bg-muted text-sm outline-none" placeholder="Wat bied je aan? Welke ervaring, certificaten, materieel..." />
           </div>
-          <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-foreground/30 transition-colors cursor-pointer">
-            <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-            <div className="mt-3 font-medium">Upload foto's of certificaten</div>
-            <div className="text-xs text-muted-foreground mt-1">PNG, JPG, PDF tot 10MB</div>
-          </div>
+          <FileUploadSection />
           <div className="flex gap-3 justify-end">
             <button type="button" className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium">Concept opslaan</button>
             <button className="px-6 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold">Publiceren</button>
