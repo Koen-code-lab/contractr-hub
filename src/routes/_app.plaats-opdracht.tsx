@@ -58,6 +58,7 @@ function PlaatsOpdracht() {
               ))}
             </div>
           </div>
+          <FileUploadSection />
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium">Concept</button>
             <button className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold">Opdracht plaatsen</button>
