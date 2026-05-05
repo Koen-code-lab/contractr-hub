@@ -78,7 +78,7 @@ export function AppShell() {
         {/* Topbar */}
         <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border">
           <div className="h-16 px-4 lg:px-8 flex items-center gap-4">
-            <div className="lg:hidden font-display font-bold tracking-tight">CONTRACTR</div>
+            <div className="hidden"></div>
             <div className="flex-1 max-w-xl">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
