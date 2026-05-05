@@ -107,9 +107,12 @@ export function AppShell() {
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent" />
             </button>
             <Link to="/mijn-profiel" className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-muted">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center text-xs font-bold">JV</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center text-xs font-bold">{initials}</div>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden sm:block" />
             </Link>
+            <button onClick={handleLogout} title="Uitloggen" className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center">
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </header>
 
