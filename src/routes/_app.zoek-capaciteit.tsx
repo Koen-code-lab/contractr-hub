@@ -116,7 +116,7 @@ function ZoekCapaciteit() {
                 </div>
                 <div className="border-t border-border mt-4 pt-4 flex items-center justify-between">
                   <div className="text-sm font-bold">{p.prijs}</div>
-                  <button className="text-sm font-semibold px-4 py-1.5 rounded-full bg-accent text-accent-foreground">Contact</button>
+                  <button className="text-sm font-semibold px-4 py-1.5 rounded-full bg-accent text-accent-foreground">Contacteer</button>
                 </div>
               </div>
             ))}
