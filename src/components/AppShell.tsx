@@ -1,4 +1,4 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Search,
@@ -12,7 +12,9 @@ import {
   Settings,
   Bell,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -29,6 +31,15 @@ const nav = [
 
 export function AppShell() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const fullName = (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
+  const initials = (fullName || user?.email || "U")
+    .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("") || "U";
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/login", replace: true });
+  };
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
@@ -96,9 +107,12 @@ export function AppShell() {
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent" />
             </button>
             <Link to="/mijn-profiel" className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-muted">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center text-xs font-bold">JV</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center text-xs font-bold">{initials}</div>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden sm:block" />
             </Link>
+            <button onClick={handleLogout} title="Uitloggen" className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center">
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </header>
 
