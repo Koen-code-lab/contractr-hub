@@ -1,4 +1,4 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Search,
@@ -12,7 +12,9 @@ import {
   Settings,
   Bell,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
