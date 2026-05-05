@@ -1,34 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Send, Search, Paperclip } from "lucide-react";
+import { useConversations, useMessages } from "@/lib/queries";
+import { EmptyState, LoadingState, ErrorState } from "@/components/States";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_app/berichten")({
   component: Berichten,
 });
 
-const conversaties = [
-  { naam: "Sofie Dubois", bedrijf: "BAM Belgium", laatste: "Bedankt voor je offerte!", tijd: "5m", ongelezen: 2 },
-  { naam: "Willemen Group", bedrijf: "Project Mechelen", laatste: "Kunnen we morgen bellen?", tijd: "1u", ongelezen: 0 },
-  { naam: "ElectroPro", bedrijf: "Voorstel BA5", laatste: "Hier is de planning...", tijd: "3u", ongelezen: 1 },
-  { naam: "Marie Lemaire", bedrijf: "Studio L+M", laatste: "Zien we elkaar op de werf?", tijd: "Gisteren", ongelezen: 0 },
-  { naam: "CIT Blaton", bedrijf: "Renovatie Brussel", laatste: "We accepteren je voorstel", tijd: "2d", ongelezen: 0 },
-];
-
-const messages = [
-  { from: "them", text: "Dag Jan, bedankt voor je interesse in onze opdracht.", time: "10:14" },
-  { from: "me", text: "Graag gedaan! Heb je de specificaties van het funderingswerk?", time: "10:15" },
-  { from: "them", text: "Ja, ik stuur je het lastenboek meteen door. We zoeken een team van 6 met VCA.", time: "10:17" },
-  { from: "me", text: "Perfect, dat past in onze planning. Kunnen we volgende week een werfbezoek inplannen?", time: "10:20" },
-  { from: "them", text: "Bedankt voor je offerte!", time: "10:32" },
-];
-
 function Berichten() {
+  const { user } = useAuth();
+  const { data: conversations, isLoading, error } = useConversations();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const currentId = activeId ?? conversations?.[0]?.id ?? null;
+  const { data: messages } = useMessages(currentId);
+  const [draft, setDraft] = useState("");
+  const qc = useQueryClient();
+
+  const send = async () => {
+    if (!draft.trim() || !currentId || !user) return;
+    const body = draft.trim();
+    setDraft("");
+    await supabase.from("messages").insert({ conversation_id: currentId, sender_id: user.id, body });
+    qc.invalidateQueries({ queryKey: ["messages", currentId] });
+  };
+
   return (
     <>
       <PageHeader title="Berichten" subtitle="Communiceer rechtstreeks met je netwerk." />
 
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden grid md:grid-cols-[320px_1fr] h-[640px]">
-        {/* List */}
         <div className="border-r border-border flex flex-col">
           <div className="p-4 border-b border-border">
             <div className="relative">
@@ -37,55 +42,83 @@ function Berichten() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {conversaties.map((c, i) => (
-              <button key={c.naam} className={`w-full text-left p-4 border-b border-border hover:bg-muted/50 ${i === 0 ? "bg-muted/40" : ""}`}>
-                <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold shrink-0">
-                    {c.naam.split(" ").map((s) => s[0]).join("").slice(0, 2)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-sm truncate">{c.naam}</div>
-                      <div className="text-xs text-muted-foreground">{c.tijd}</div>
+            {isLoading && <div className="p-4 text-sm text-muted-foreground">Laden…</div>}
+            {error && <div className="p-4 text-sm text-destructive">Kon gesprekken niet laden.</div>}
+            {!isLoading && conversations?.length === 0 && (
+              <div className="p-6 text-sm text-muted-foreground text-center">Nog geen gesprekken.</div>
+            )}
+            {conversations?.map((c) => {
+              const isActive = c.id === currentId;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setActiveId(c.id)}
+                  className={`w-full text-left p-4 border-b border-border hover:bg-muted/50 ${isActive ? "bg-muted/40" : ""}`}
+                >
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold shrink-0">
+                      {c.id.slice(0, 2).toUpperCase()}
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">{c.bedrijf}</div>
-                    <div className="text-xs mt-1 truncate flex items-center gap-2">
-                      <span className="truncate">{c.laatste}</span>
-                      {c.ongelezen > 0 && <span className="ml-auto bg-accent text-accent-foreground rounded-full px-1.5 text-[10px] font-bold">{c.ongelezen}</span>}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm truncate">Gesprek</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(c.last_message_at).toLocaleDateString("nl-BE")}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Chat */}
         <div className="flex flex-col min-w-0">
-          <div className="p-4 border-b border-border flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">SD</div>
-            <div>
-              <div className="font-semibold text-sm">Sofie Dubois</div>
-              <div className="text-xs text-success">● Online</div>
+          {!currentId ? (
+            <div className="flex-1 flex items-center justify-center p-10">
+              <EmptyState title="Selecteer een gesprek" description="Begin een gesprek vanuit een profiel of bedrijf." />
             </div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.from === "me" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-                  m.from === "me" ? "bg-foreground text-background" : "bg-card border border-border"
-                }`}>
-                  <div>{m.text}</div>
-                  <div className={`text-[10px] mt-1 ${m.from === "me" ? "opacity-60" : "text-muted-foreground"}`}>{m.time}</div>
+          ) : (
+            <>
+              <div className="p-4 border-b border-border flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">··</div>
+                <div>
+                  <div className="font-semibold text-sm">Gesprek</div>
+                  <div className="text-xs text-muted-foreground">{messages?.length ?? 0} berichten</div>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="p-4 border-t border-border flex gap-2 items-center">
-            <button className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
-            <input placeholder="Schrijf een bericht..." className="flex-1 h-11 px-4 rounded-full bg-muted text-sm outline-none" />
-            <button className="w-11 h-11 rounded-full bg-accent text-accent-foreground flex items-center justify-center"><Send className="w-4 h-4" /></button>
-          </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
+                {messages?.length === 0 && (
+                  <div className="text-sm text-muted-foreground text-center">Nog geen berichten in dit gesprek.</div>
+                )}
+                {messages?.map((m) => {
+                  const mine = m.sender_id === user?.id;
+                  return (
+                    <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${mine ? "bg-foreground text-background" : "bg-card border border-border"}`}>
+                        <div>{m.body}</div>
+                        <div className={`text-[10px] mt-1 ${mine ? "opacity-60" : "text-muted-foreground"}`}>
+                          {new Date(m.created_at).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <form
+                onSubmit={(e) => { e.preventDefault(); send(); }}
+                className="p-4 border-t border-border flex gap-2 items-center"
+              >
+                <button type="button" className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Schrijf een bericht..."
+                  className="flex-1 h-11 px-4 rounded-full bg-muted text-sm outline-none"
+                />
+                <button type="submit" className="w-11 h-11 rounded-full bg-accent text-accent-foreground flex items-center justify-center"><Send className="w-4 h-4" /></button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </>
