@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Eye, Edit, MoreHorizontal } from "lucide-react";
-import { useMyPublications } from "@/lib/queries";
+import { useMyProjects, useMyCapacityPosts } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 
 export const Route = createFileRoute("/_app/mijn-publicaties")({
@@ -10,16 +11,49 @@ export const Route = createFileRoute("/_app/mijn-publicaties")({
 
 const statusLabel: Record<string, string> = {
   actief: "Actief",
+  concept: "Concept",
   in_gesprek: "In gesprek",
   gesloten: "Gesloten",
   verlopen: "Verlopen",
 };
 
+type Row = {
+  id: string;
+  title: string;
+  type: "opdracht" | "capaciteit";
+  status: string;
+  created_at: string;
+};
+
 function MijnPublicaties() {
-  const { data, isLoading, error } = useMyPublications();
-  const total = data?.length ?? 0;
-  const actief = data?.filter((p) => p.status === "actief").length ?? 0;
-  const totalViews = data?.reduce((s, p) => s + (p.views ?? 0), 0) ?? 0;
+  const projects = useMyProjects();
+  const capacity = useMyCapacityPosts();
+
+  const isLoading = projects.isLoading || capacity.isLoading;
+  const error = projects.error ?? capacity.error;
+
+  const data = useMemo<Row[]>(() => {
+    const rows: Row[] = [
+      ...(projects.data ?? []).map((p) => ({
+        id: p.id,
+        title: p.title,
+        type: "opdracht" as const,
+        status: p.status,
+        created_at: p.created_at,
+      })),
+      ...(capacity.data ?? []).map((c) => ({
+        id: c.id,
+        title: c.title,
+        type: "capaciteit" as const,
+        status: "actief",
+        created_at: c.created_at,
+      })),
+    ];
+    return rows.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, [projects.data, capacity.data]);
+
+  const total = data.length;
+  const actief = data.filter((p) => p.status === "actief").length;
 
   return (
     <>
@@ -39,8 +73,8 @@ function MijnPublicaties() {
         {[
           { l: "Totaal publicaties", v: total },
           { l: "Actief", v: actief },
-          { l: "Totaal views", v: totalViews },
-          { l: "Reacties", v: 0 },
+          { l: "Opdrachten", v: projects.data?.length ?? 0 },
+          { l: "Capaciteit", v: capacity.data?.length ?? 0 },
         ].map((s) => (
           <div key={s.l} className="bg-card rounded-2xl border border-border p-5 shadow-card">
             <div className="text-3xl font-display font-bold">{s.v}</div>
@@ -51,11 +85,11 @@ function MijnPublicaties() {
 
       {isLoading && <LoadingState />}
       {error && <ErrorState error={error} />}
-      {!isLoading && !error && data && data.length === 0 && (
+      {!isLoading && !error && data.length === 0 && (
         <EmptyState title="Nog geen publicaties" description="Plaats een opdracht of bied capaciteit aan om hier te verschijnen." />
       )}
 
-      {data && data.length > 0 && (
+      {data.length > 0 && (
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
@@ -70,7 +104,7 @@ function MijnPublicaties() {
             </thead>
             <tbody>
               {data.map((p) => (
-                <tr key={p.id} className="border-t border-border hover:bg-muted/30">
+                <tr key={`${p.type}-${p.id}`} className="border-t border-border hover:bg-muted/30">
                   <td className="px-6 py-4 font-medium">{p.title}</td>
                   <td className="px-6 py-4 text-muted-foreground capitalize">{p.type}</td>
                   <td className="px-6 py-4">
@@ -79,7 +113,7 @@ function MijnPublicaties() {
                       p.status === "verlopen" ? "bg-muted text-muted-foreground" : "bg-foreground/10"
                     }`}>{statusLabel[p.status] ?? p.status}</span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground"><span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{p.views ?? 0}</span></td>
+                  <td className="px-6 py-4 text-muted-foreground"><span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5" />0</span></td>
                   <td className="px-6 py-4 text-muted-foreground">{new Date(p.created_at).toLocaleDateString("nl-BE")}</td>
                   <td className="px-6 py-4">
                     <div className="flex gap-1">
