@@ -146,7 +146,7 @@ function PlaatsOpdracht() {
               ))}
             </div>
           </div>
-          <FileUploadSection />
+          <FileUploadSection files={attachments} onChange={setAttachments} />
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" disabled={submitting} onClick={(e) => submit("concept", e)} className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium disabled:opacity-50">Concept</button>
             <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50">
