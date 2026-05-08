@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { FileUploadSection } from "@/components/FileUploadSection";
+import { FileUploadSection, type UploadedFile } from "@/components/FileUploadSection";
 import { HardHat } from "lucide-react";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
@@ -8,6 +9,7 @@ export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
 });
 
 function BiedCapaciteitAan() {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   return (
     <>
       <PageHeader
@@ -54,7 +56,7 @@ function BiedCapaciteitAan() {
             <label className="text-sm font-medium block mb-2">Beschrijving</label>
             <textarea rows={5} className="w-full px-4 py-3 rounded-xl bg-muted text-sm outline-none" placeholder="Wat bied je aan? Welke ervaring, certificaten, materieel..." />
           </div>
-          <FileUploadSection />
+          <FileUploadSection files={files} onChange={setFiles} />
           <div className="flex gap-3 justify-end">
             <button type="button" className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium">Concept opslaan</button>
             <button className="px-6 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold">Publiceren</button>

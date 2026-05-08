@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { FileUploadSection } from "@/components/FileUploadSection";
+import { FileUploadSection, type UploadedFile } from "@/components/FileUploadSection";
 import { Briefcase } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
@@ -23,6 +23,7 @@ function PlaatsOpdracht() {
   const [startDate, setStartDate] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const toggleTag = (t: string) =>
@@ -54,13 +55,44 @@ function PlaatsOpdracht() {
       })
       .select("id")
       .single();
-    setSubmitting(false);
-    if (error) {
-      toast.error(error.message);
+    if (error || !data) {
+      setSubmitting(false);
+      toast.error(error?.message ?? "Kon opdracht niet opslaan.");
       return;
     }
-    toast.success(status === "concept" ? "Concept opgeslagen." : "Opdracht geplaatst.");
-    void data;
+
+    const projectId = data.id;
+    const visMap: Record<UploadedFile["visibility"], string> = {
+      "publiek": "public",
+      "na-contact": "after-contact",
+      "prive": "private",
+    };
+    const failed: string[] = [];
+    for (const item of attachments) {
+      const safe = item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${user.id}/${projectId}/${Date.now()}-${safe}`;
+      const up = await supabase.storage.from("project-files").upload(path, item.file, {
+        contentType: item.file.type || undefined,
+        upsert: false,
+      });
+      if (up.error) { failed.push(item.file.name); continue; }
+      const { data: pub } = supabase.storage.from("project-files").getPublicUrl(up.data.path);
+      const { error: insErr } = await supabase.from("project_files").insert({
+        project_id: projectId,
+        file_url: pub.publicUrl,
+        file_name: item.file.name,
+        file_type: item.file.type || null,
+        visibility: visMap[item.visibility],
+      });
+      if (insErr) failed.push(item.file.name);
+    }
+
+    setSubmitting(false);
+    if (failed.length) {
+      toast.warning(`Opdracht opgeslagen, maar ${failed.length} bestand(en) faalden: ${failed.join(", ")}`);
+    } else {
+      toast.success(status === "concept" ? "Concept opgeslagen." : "Opdracht geplaatst.");
+    }
     navigate({ to: "/mijn-publicaties" });
   };
 
@@ -114,7 +146,7 @@ function PlaatsOpdracht() {
               ))}
             </div>
           </div>
-          <FileUploadSection />
+          <FileUploadSection files={attachments} onChange={setAttachments} />
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" disabled={submitting} onClick={(e) => submit("concept", e)} className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium disabled:opacity-50">Concept</button>
             <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50">
