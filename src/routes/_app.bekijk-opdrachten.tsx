@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { Briefcase, MapPin, Calendar, Building2, Circle } from "lucide-react";
@@ -21,6 +22,13 @@ const statusColor: Record<string, string> = {
   gesloten: "text-destructive",
   verlopen: "text-muted-foreground",
 };
+
+const FILTERS: { label: string; value: "all" | "actief" | "in_gesprek" | "gesloten" }[] = [
+  { label: "Alle", value: "all" },
+  { label: "Open", value: "actief" },
+  { label: "In gesprek", value: "in_gesprek" },
+  { label: "Toegewezen", value: "gesloten" },
+];
 
 function formatBudget(b: number | null | undefined) {
   if (b == null) return "—";
