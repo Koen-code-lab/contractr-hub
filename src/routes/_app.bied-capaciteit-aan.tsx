@@ -30,10 +30,10 @@ function BiedCapaciteitAan() {
       toast.error("Log in om capaciteit aan te bieden.");
       return;
     }
-    if (!title.trim()) {
-      toast.error("Geef je publicatie een titel.");
-      return;
-    }
+    if (!title.trim()) { toast.error("Geef je publicatie een titel."); return; }
+    if (!specialisation) { toast.error("Kies een categorie."); return; }
+    if (!region) { toast.error("Kies een provincie."); return; }
+    if (!availableFrom) { toast.error("Kies een beschikbaarheidsdatum."); return; }
     setSubmitting(true);
     const { error } = await supabase.from("capacity_posts").insert({
       created_by: user.id,
