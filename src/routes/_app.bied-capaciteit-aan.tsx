@@ -1,15 +1,58 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { FileUploadSection, type UploadedFile } from "@/components/FileUploadSection";
 import { HardHat } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
 });
 
 function BiedCapaciteitAan() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [title, setTitle] = useState("");
+  const [specialisation, setSpecialisation] = useState("Ruwbouw");
+  const [region, setRegion] = useState("Heel België");
+  const [availableFrom, setAvailableFrom] = useState("");
+  const [rate, setRate] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async (publish: boolean, e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Log in om capaciteit aan te bieden.");
+      return;
+    }
+    if (!title.trim()) {
+      toast.error("Geef je publicatie een titel.");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("capacity_posts").insert({
+      created_by: user.id,
+      title: title.trim(),
+      description: description.trim() || null,
+      specialisation,
+      region,
+      available_from: availableFrom || null,
+      capacity_type: "hourly_rate",
+      capacity_value: rate ? Number(rate) : null,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(publish ? "Capaciteit gepubliceerd." : "Concept opgeslagen.");
+    navigate({ to: "/mijn-publicaties" });
+  };
+
   return (
     <>
       <PageHeader
@@ -18,15 +61,15 @@ function BiedCapaciteitAan() {
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <form className="lg:col-span-2 bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
+        <form onSubmit={(e) => submit(true, e)} className="lg:col-span-2 bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
           <div>
             <label className="text-sm font-medium block mb-2">Titel publicatie</label>
-            <input className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Bv. Team metselaars beschikbaar in Vlaanderen" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Bv. Team metselaars beschikbaar in Vlaanderen" />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium block mb-2">Categorie</label>
-              <select className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
+              <select value={specialisation} onChange={(e) => setSpecialisation(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
                 <option>Ruwbouw</option>
                 <option>Afwerking</option>
                 <option>Technieken</option>
@@ -36,7 +79,7 @@ function BiedCapaciteitAan() {
             </div>
             <div>
               <label className="text-sm font-medium block mb-2">Regio</label>
-              <select className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
+              <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
                 <option>Heel België</option>
                 <option>Vlaanderen</option>
                 <option>Wallonië</option>
@@ -45,21 +88,23 @@ function BiedCapaciteitAan() {
             </div>
             <div>
               <label className="text-sm font-medium block mb-2">Beschikbaar vanaf</label>
-              <input type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
+              <input value={availableFrom} onChange={(e) => setAvailableFrom(e.target.value)} type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
             </div>
             <div>
               <label className="text-sm font-medium block mb-2">Tarief (€/u)</label>
-              <input className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" placeholder="65" />
+              <input value={rate} onChange={(e) => setRate(e.target.value)} type="number" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" placeholder="65" />
             </div>
           </div>
           <div>
             <label className="text-sm font-medium block mb-2">Beschrijving</label>
-            <textarea rows={5} className="w-full px-4 py-3 rounded-xl bg-muted text-sm outline-none" placeholder="Wat bied je aan? Welke ervaring, certificaten, materieel..." />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} className="w-full px-4 py-3 rounded-xl bg-muted text-sm outline-none" placeholder="Wat bied je aan? Welke ervaring, certificaten, materieel..." />
           </div>
           <FileUploadSection files={files} onChange={setFiles} />
           <div className="flex gap-3 justify-end">
-            <button type="button" className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium">Concept opslaan</button>
-            <button className="px-6 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold">Publiceren</button>
+            <button type="button" disabled={submitting} onClick={(e) => submit(false, e)} className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium disabled:opacity-50">Concept opslaan</button>
+            <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+              {submitting ? "Bezig..." : "Publiceren"}
+            </button>
           </div>
         </form>
 
