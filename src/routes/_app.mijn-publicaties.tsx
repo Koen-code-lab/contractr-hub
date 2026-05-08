@@ -66,10 +66,11 @@ function MijnPublicaties() {
     type === "opdracht" ? "projects" : "capacity_posts";
 
   const setStatus = async (row: Row, status: string) => {
-    const tbl = tableFor(row.type);
-    const { error } = tbl === "projects"
-      ? await supabase.from("projects").update({ status }).eq("id", row.id)
-      : await supabase.from("capacity_posts").update({ status: status as never }).eq("id", row.id);
+    if (row.type !== "opdracht") {
+      toast.info("Status wijzigen is enkel beschikbaar voor opdrachten.");
+      return;
+    }
+    const { error } = await supabase.from("projects").update({ status }).eq("id", row.id);
     if (error) { toast.error(error.message); return; }
     toast.success(`Status: ${statusLabel[status] ?? status}`);
     refetch();
@@ -77,7 +78,9 @@ function MijnPublicaties() {
 
   const remove = async (row: Row) => {
     if (!confirm(`Verwijder "${row.title}"?`)) return;
-    const { error } = await supabase.from(tableFor(row.type)).delete().eq("id", row.id);
+    const { error } = row.type === "opdracht"
+      ? await supabase.from("projects").delete().eq("id", row.id)
+      : await supabase.from("capacity_posts").delete().eq("id", row.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Verwijderd.");
     refetch();
@@ -85,17 +88,20 @@ function MijnPublicaties() {
 
   const duplicate = async (row: Row) => {
     if (!user) return;
-    const tbl = tableFor(row.type);
-    const { data: src } = await supabase.from(tbl).select("*").eq("id", row.id).maybeSingle();
-    if (!src) { toast.error("Bron niet gevonden."); return; }
-    const copy = { ...(src as Record<string, unknown>) };
-    delete copy.id; delete copy.created_at; delete copy.updated_at;
-    copy.created_by = user.id;
-    copy.title = `${row.title} (kopie)`;
-    copy.status = "concept";
-    const { error } = await supabase.from(tbl).insert(copy as never);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Gedupliceerd als concept.");
+    if (row.type === "opdracht") {
+      const { data: src } = await supabase.from("projects").select("*").eq("id", row.id).maybeSingle();
+      if (!src) { toast.error("Bron niet gevonden."); return; }
+      const { id: _id, created_at: _c, updated_at: _u, ...rest } = src;
+      const { error } = await supabase.from("projects").insert({ ...rest, created_by: user.id, title: `${row.title} (kopie)`, status: "concept" });
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { data: src } = await supabase.from("capacity_posts").select("*").eq("id", row.id).maybeSingle();
+      if (!src) { toast.error("Bron niet gevonden."); return; }
+      const { id: _id, created_at: _c, updated_at: _u, ...rest } = src;
+      const { error } = await supabase.from("capacity_posts").insert({ ...rest, created_by: user.id, title: `${row.title} (kopie)` });
+      if (error) { toast.error(error.message); return; }
+    }
+    toast.success("Gedupliceerd.");
     refetch();
   };
 
