@@ -16,7 +16,12 @@ export function LoadingState({ label = "Laden…" }: { label?: string }) {
 }
 
 export function ErrorState({ error }: { error: unknown }) {
-  const msg = error instanceof Error ? error.message : "Er ging iets mis.";
+  const msg =
+    error instanceof Error
+      ? error.message
+      : error && typeof error === "object" && "message" in error
+        ? String((error as { message?: unknown }).message ?? "Er ging iets mis.")
+        : "Er ging iets mis.";
   const details =
     error && typeof error === "object" && "details" in error
       ? String((error as { details?: unknown }).details ?? "")
