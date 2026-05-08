@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { FileUploadSection } from "@/components/FileUploadSection";
+import { FileUploadSection, type UploadedFile } from "@/components/FileUploadSection";
 import { Briefcase } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
