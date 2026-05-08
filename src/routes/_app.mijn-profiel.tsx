@@ -242,6 +242,7 @@ function ProfileEditDialog({
         name: form.company_name || "Mijn bedrijf",
         company_type: form.company_type || null,
         city: form.city || null,
+        region: form.region || null,
         employees: form.employees ? Number(form.employees) : null,
         certifications: certs,
         recent_projects: projects,
