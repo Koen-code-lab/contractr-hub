@@ -320,10 +320,12 @@ export type Database = {
           description: string | null
           id: string
           location: string | null
+          region: string | null
           start_date: string | null
           status: string
           title: string
           updated_at: string
+          urgency: string | null
           visibility: string
         }
         Insert: {
@@ -337,10 +339,12 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          region?: string | null
           start_date?: string | null
           status?: string
           title: string
           updated_at?: string
+          urgency?: string | null
           visibility?: string
         }
         Update: {
@@ -354,10 +358,12 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          region?: string | null
           start_date?: string | null
           status?: string
           title?: string
           updated_at?: string
+          urgency?: string | null
           visibility?: string
         }
         Relationships: [
