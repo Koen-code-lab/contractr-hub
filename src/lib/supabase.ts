@@ -11,7 +11,6 @@ const SUPABASE_URL =
 
 const SUPABASE_ANON_KEY =
   (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ||
-  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
   (typeof process !== "undefined" ? process.env.VITE_SUPABASE_ANON_KEY : undefined);
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
