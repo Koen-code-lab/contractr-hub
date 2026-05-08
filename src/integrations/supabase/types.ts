@@ -14,12 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
+      capacity_posts: {
+        Row: {
+          available_from: string | null
+          available_until: string | null
+          capacity_type: string | null
+          capacity_value: number | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          region: string | null
+          specialisation: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          available_from?: string | null
+          available_until?: string | null
+          capacity_type?: string | null
+          capacity_value?: number | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          region?: string | null
+          specialisation?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          available_from?: string | null
+          available_until?: string | null
+          capacity_type?: string | null
+          capacity_value?: number | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          region?: string | null
+          specialisation?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capacity_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capacity_posts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
+          address: string | null
+          city: string | null
+          company_type: string | null
+          country: string | null
           created_at: string
           description: string | null
           id: string
+          logo_url: string | null
           name: string
+          postal_code: string | null
           region: string | null
           type: string | null
           updated_at: string
@@ -27,10 +96,16 @@ export type Database = {
           verified: boolean
         }
         Insert: {
+          address?: string | null
+          city?: string | null
+          company_type?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           name: string
+          postal_code?: string | null
           region?: string | null
           type?: string | null
           updated_at?: string
@@ -38,10 +113,16 @@ export type Database = {
           verified?: boolean
         }
         Update: {
+          address?: string | null
+          city?: string | null
+          company_type?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
+          postal_code?: string | null
           region?: string | null
           type?: string | null
           updated_at?: string
@@ -133,32 +214,41 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           company_id: string | null
           created_at: string
           full_name: string | null
           id: string
+          phone: string | null
           region: string | null
           role: string | null
+          specialisations: string[] | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           company_id?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          phone?: string | null
           region?: string | null
           role?: string | null
+          specialisations?: string[] | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           company_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          phone?: string | null
           region?: string | null
           role?: string | null
+          specialisations?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -167,6 +257,113 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_files: {
+        Row: {
+          file_name: string
+          file_type: string | null
+          file_url: string
+          id: string
+          project_id: string
+          uploaded_at: string
+          visibility: string
+        }
+        Insert: {
+          file_name: string
+          file_type?: string | null
+          file_url: string
+          id?: string
+          project_id: string
+          uploaded_at?: string
+          visibility?: string
+        }
+        Update: {
+          file_name?: string
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          project_id?: string
+          uploaded_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          category: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          deadline: string | null
+          description: string | null
+          id: string
+          location: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
