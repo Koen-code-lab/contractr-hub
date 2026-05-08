@@ -25,8 +25,18 @@ function readEnv(name: string): string | undefined {
 }
 
 const SUPABASE_URL = readEnv("VITE_SUPABASE_URL");
-const SUPABASE_ANON_KEY =
-  readEnv("VITE_SUPABASE_ANON_KEY") || readEnv("VITE_SUPABASE_PUBLISHABLE_KEY");
+const SUPABASE_ANON_KEY = readEnv("VITE_SUPABASE_ANON_KEY");
+
+// Runtime diagnostic so the active project is visible in the browser console.
+if (typeof window !== "undefined") {
+  const ref = SUPABASE_URL?.match(/^https?:\/\/([^.]+)\.supabase\.co/i)?.[1] ?? null;
+  // eslint-disable-next-line no-console
+  console.info("[supabase] VITE_SUPABASE_URL =", SUPABASE_URL);
+  // eslint-disable-next-line no-console
+  console.info("[supabase] project ref =", ref);
+  // eslint-disable-next-line no-console
+  console.info("[supabase] VITE_SUPABASE_ANON_KEY set =", Boolean(SUPABASE_ANON_KEY));
+}
 
 export const supabaseConfigError: string | null = (() => {
   const missing: string[] = [];
