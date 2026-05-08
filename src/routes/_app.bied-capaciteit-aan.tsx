@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { FileUploadSection } from "@/components/FileUploadSection";
+import { FileUploadSection, type UploadedFile } from "@/components/FileUploadSection";
 import { HardHat } from "lucide-react";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
@@ -8,6 +9,7 @@ export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
 });
 
 function BiedCapaciteitAan() {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   return (
     <>
       <PageHeader
