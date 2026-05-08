@@ -62,8 +62,6 @@ function MijnPublicaties() {
     qc.invalidateQueries({ queryKey: ["my-capacity-posts", user?.id] });
   };
 
-  const tableFor = (type: Row["type"]): "projects" | "capacity_posts" =>
-    type === "opdracht" ? "projects" : "capacity_posts";
 
   const setStatus = async (row: Row, status: string) => {
     if (row.type !== "opdracht") {
