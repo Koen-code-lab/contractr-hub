@@ -86,7 +86,7 @@ function MijnPublicaties() {
       {isLoading && <LoadingState />}
       {error && <ErrorState error={error} />}
       {!isLoading && !error && data.length === 0 && (
-        <EmptyState title="Nog geen publicaties" description="Plaats een opdracht of bied capaciteit aan om hier te verschijnen." />
+        <EmptyState title="Je hebt nog geen publicaties." description="Plaats een opdracht of bied capaciteit aan om hier te verschijnen." />
       )}
 
       {data.length > 0 && (
