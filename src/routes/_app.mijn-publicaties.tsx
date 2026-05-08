@@ -62,10 +62,14 @@ function MijnPublicaties() {
     qc.invalidateQueries({ queryKey: ["my-capacity-posts", user?.id] });
   };
 
-  const tableFor = (type: Row["type"]) => (type === "opdracht" ? "projects" : "capacity_posts");
+  const tableFor = (type: Row["type"]): "projects" | "capacity_posts" =>
+    type === "opdracht" ? "projects" : "capacity_posts";
 
   const setStatus = async (row: Row, status: string) => {
-    const { error } = await supabase.from(tableFor(row.type)).update({ status }).eq("id", row.id);
+    const tbl = tableFor(row.type);
+    const { error } = tbl === "projects"
+      ? await supabase.from("projects").update({ status }).eq("id", row.id)
+      : await supabase.from("capacity_posts").update({ status: status as never }).eq("id", row.id);
     if (error) { toast.error(error.message); return; }
     toast.success(`Status: ${statusLabel[status] ?? status}`);
     refetch();
