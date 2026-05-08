@@ -39,10 +39,10 @@ function PlaatsOpdracht() {
       toast.error("Log in om een opdracht te plaatsen.");
       return;
     }
-    if (!title.trim()) {
-      toast.error("Geef je opdracht een naam.");
-      return;
-    }
+    if (!title.trim()) { toast.error("Geef je opdracht een naam."); return; }
+    if (!category) { toast.error("Kies een categorie."); return; }
+    if (!region) { toast.error("Kies een provincie."); return; }
+    if (!startDate) { toast.error("Kies een startdatum."); return; }
     setSubmitting(true);
     const desc = [description.trim(), tags.length ? `\n\nVereiste expertise: ${tags.join(", ")}` : ""].join("");
     const { data, error } = await supabase
@@ -52,9 +52,11 @@ function PlaatsOpdracht() {
         title: title.trim(),
         description: desc || null,
         category,
+        region,
         location: location || null,
         budget_max: budget ? Number(budget) : null,
-        start_date: startDate || null,
+        start_date: startDate,
+        urgency: urgency || null,
         status,
       })
       .select("id")
