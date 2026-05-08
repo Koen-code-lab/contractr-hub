@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Upload, FileText, Image as ImageIcon, X } from "lucide-react";
 
-type Visibility = "publiek" | "na-contact" | "prive";
+export type Visibility = "publiek" | "na-contact" | "prive";
 
-type UploadedFile = {
+export type UploadedFile = {
   id: string;
   file: File;
   visibility: Visibility;
@@ -30,10 +30,14 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function FileUploadSection() {
+type Props = {
+  files: UploadedFile[];
+  onChange: (files: UploadedFile[]) => void;
+};
+
+export function FileUploadSection({ files, onChange }: Props) {
   const photoRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<UploadedFile[]>([]);
 
   const addFiles = (list: FileList | null) => {
     if (!list) return;
@@ -42,14 +46,14 @@ export function FileUploadSection() {
       file,
       visibility: "publiek",
     }));
-    setFiles((prev) => [...prev, ...next]);
+    onChange([...files, ...next]);
   };
 
   const updateVisibility = (id: string, visibility: Visibility) => {
-    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, visibility } : f)));
+    onChange(files.map((f) => (f.id === id ? { ...f, visibility } : f)));
   };
 
-  const remove = (id: string) => setFiles((prev) => prev.filter((f) => f.id !== id));
+  const remove = (id: string) => onChange(files.filter((f) => f.id !== id));
 
   return (
     <div className="space-y-4">
