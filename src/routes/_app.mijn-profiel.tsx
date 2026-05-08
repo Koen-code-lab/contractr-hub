@@ -301,9 +301,19 @@ function ProfileEditDialog({
               <Input value={form.company_type} onChange={(e) => setForm({ ...form, company_type: e.target.value })} placeholder="Bv. Algemeen aannemer" />
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Field label="Locatie (stad)">
               <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            </Field>
+            <Field label="Provincie">
+              <select
+                value={form.region}
+                onChange={(e) => setForm({ ...form, region: e.target.value })}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none"
+              >
+                <option value="">—</option>
+                {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
             </Field>
             <Field label="Aantal medewerkers">
               <Input type="number" min="0" value={form.employees} onChange={(e) => setForm({ ...form, employees: e.target.value })} />
