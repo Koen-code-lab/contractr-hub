@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
 import { MapPin, CheckCircle2, Award, Building2, Calendar } from "lucide-react";
 
@@ -37,7 +37,13 @@ function MijnProfiel() {
             </div>
             <div className="flex gap-2 pb-2">
               <button className="px-5 py-2.5 rounded-full bg-muted text-sm font-medium">Profiel delen</button>
-              <button className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium">Profiel bewerken</button>
+              <Link
+                to="/instellingen"
+                search={{ tab: "account" }}
+                className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium"
+              >
+                Profiel bewerken
+              </Link>
             </div>
           </div>
         </div>
