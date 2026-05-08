@@ -37,6 +37,12 @@ function formatBudget(b: number | null | undefined) {
 
 function BekijkOpdrachten() {
   const { data, isLoading, error } = usePublicationsByType("opdracht");
+  const [filter, setFilter] = useState<"all" | "actief" | "in_gesprek" | "gesloten">("all");
+
+  const filtered = useMemo(
+    () => (filter === "all" ? data ?? [] : (data ?? []).filter((o) => o.status === filter)),
+    [data, filter],
+  );
 
   return (
     <>
@@ -45,9 +51,15 @@ function BekijkOpdrachten() {
         subtitle="Ontdek lopende aanbestedingen en projecten waar je op kan bieden."
         actions={
           <div className="flex gap-2 flex-wrap">
-            {["Alle", "Open", "In gesprek", "Toegewezen"].map((t, i) => (
-              <button key={t} className={`px-4 py-2 rounded-full text-sm font-medium ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"}`}>
-                {t}
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  filter === f.value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"
+                }`}
+              >
+                {f.label}
               </button>
             ))}
           </div>
