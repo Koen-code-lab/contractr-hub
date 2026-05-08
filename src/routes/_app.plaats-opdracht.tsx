@@ -23,6 +23,7 @@ function PlaatsOpdracht() {
   const [startDate, setStartDate] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const toggleTag = (t: string) =>
