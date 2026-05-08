@@ -5,6 +5,7 @@ import { RegionActivity } from "@/components/RegionActivity";
 import { MapPin, HardHat, Search, Calendar } from "lucide-react";
 import { useCapacityPosts } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
   component: ZoekCapaciteit,
