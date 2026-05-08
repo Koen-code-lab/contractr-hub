@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/mijn-profiel")({
   component: MijnProfiel,
