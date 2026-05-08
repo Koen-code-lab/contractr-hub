@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { Briefcase, MapPin, Calendar, Building2, Circle } from "lucide-react";
@@ -22,6 +23,13 @@ const statusColor: Record<string, string> = {
   verlopen: "text-muted-foreground",
 };
 
+const FILTERS: { label: string; value: "all" | "actief" | "in_gesprek" | "gesloten" }[] = [
+  { label: "Alle", value: "all" },
+  { label: "Open", value: "actief" },
+  { label: "In gesprek", value: "in_gesprek" },
+  { label: "Toegewezen", value: "gesloten" },
+];
+
 function formatBudget(b: number | null | undefined) {
   if (b == null) return "—";
   return new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(b));
@@ -29,6 +37,12 @@ function formatBudget(b: number | null | undefined) {
 
 function BekijkOpdrachten() {
   const { data, isLoading, error } = usePublicationsByType("opdracht");
+  const [filter, setFilter] = useState<"all" | "actief" | "in_gesprek" | "gesloten">("all");
+
+  const filtered = useMemo(
+    () => (filter === "all" ? data ?? [] : (data ?? []).filter((o) => o.status === filter)),
+    [data, filter],
+  );
 
   return (
     <>
@@ -37,9 +51,15 @@ function BekijkOpdrachten() {
         subtitle="Ontdek lopende aanbestedingen en projecten waar je op kan bieden."
         actions={
           <div className="flex gap-2 flex-wrap">
-            {["Alle", "Open", "In gesprek", "Toegewezen"].map((t, i) => (
-              <button key={t} className={`px-4 py-2 rounded-full text-sm font-medium ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"}`}>
-                {t}
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  filter === f.value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"
+                }`}
+              >
+                {f.label}
               </button>
             ))}
           </div>
@@ -50,10 +70,13 @@ function BekijkOpdrachten() {
         <div className="space-y-4">
           {isLoading && <LoadingState />}
           {error && <ErrorState error={error} />}
-          {!isLoading && !error && data && data.length === 0 && (
-            <EmptyState title="Nog geen opdrachten" description="Er zijn momenteel geen opdrachten gepubliceerd." />
+          {!isLoading && !error && filtered.length === 0 && (
+            <EmptyState
+              title="Geen opdrachten gevonden"
+              description={filter === "all" ? "Er zijn momenteel geen opdrachten gepubliceerd." : "Geen opdrachten met deze status."}
+            />
           )}
-          {data?.map((o) => {
+          {filtered.map((o) => {
             const company = (o as { company?: { name?: string } }).company;
             return (
               <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 transition-all">
