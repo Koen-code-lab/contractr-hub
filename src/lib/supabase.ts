@@ -7,8 +7,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 const SUPABASE_URL = "https://vktffxcdghgufxvnozzg.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrdGZmeGNkZ2hndWZ4dm5venpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzU3MzIsImV4cCI6MjA5MzU1MTczMn0.J9YHNbU1ODFuo7unE5TNPASX-atPRGOQMdFP8vxmEzo";
+const SUPABASE_ANON_KEY = "sb_publishable_3AhZfvv9IlmTyFb1eXlNZg_nkOXGgmN";
 
 if (typeof window !== "undefined") {
   // eslint-disable-next-line no-console
