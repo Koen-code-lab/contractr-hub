@@ -5,13 +5,14 @@ import { RegionActivity } from "@/components/RegionActivity";
 import { MapPin, HardHat, Search, Calendar } from "lucide-react";
 import { useCapacityPosts } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
   component: ZoekCapaciteit,
 });
 
 const specialiteiten = ["Funderingen", "Metselwerken", "Dakwerken", "Elektriciteit", "Sanitair", "Afwerking", "Hijsen / Kranen", "Wegenwerken"];
-const regios = ["Antwerpen", "Brussel", "Oost-Vlaanderen", "West-Vlaanderen", "Limburg", "Vlaams-Brabant", "Henegouwen", "Luik"];
+const regios = BELGIAN_REGIONS;
 const beschikbaarheden = ["Direct", "Deze week", "Deze maand", "Volgend kwartaal"] as const;
 type Beschikbaarheid = (typeof beschikbaarheden)[number];
 

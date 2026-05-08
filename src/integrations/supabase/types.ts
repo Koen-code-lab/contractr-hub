@@ -80,15 +80,18 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          certifications: string[]
           city: string | null
           company_type: string | null
           country: string | null
           created_at: string
           description: string | null
+          employees: number | null
           id: string
           logo_url: string | null
           name: string
           postal_code: string | null
+          recent_projects: Json
           region: string | null
           type: string | null
           updated_at: string
@@ -97,15 +100,18 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          certifications?: string[]
           city?: string | null
           company_type?: string | null
           country?: string | null
           created_at?: string
           description?: string | null
+          employees?: number | null
           id?: string
           logo_url?: string | null
           name: string
           postal_code?: string | null
+          recent_projects?: Json
           region?: string | null
           type?: string | null
           updated_at?: string
@@ -114,15 +120,18 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          certifications?: string[]
           city?: string | null
           company_type?: string | null
           country?: string | null
           created_at?: string
           description?: string | null
+          employees?: number | null
           id?: string
           logo_url?: string | null
           name?: string
           postal_code?: string | null
+          recent_projects?: Json
           region?: string | null
           type?: string | null
           updated_at?: string

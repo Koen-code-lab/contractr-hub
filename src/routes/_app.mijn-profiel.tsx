@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/mijn-profiel")({
   component: MijnProfiel,
@@ -198,6 +199,7 @@ function ProfileEditDialog({
     company_name: "",
     company_type: "",
     city: "",
+    region: "",
     employees: "",
     specialisations: "",
     certifications: "",
@@ -212,6 +214,7 @@ function ProfileEditDialog({
       company_name: company?.name ?? "",
       company_type: company?.company_type ?? "",
       city: company?.city ?? "",
+      region: company?.region ?? profile?.region ?? "",
       employees: company?.employees != null ? String(company.employees) : "",
       specialisations: (profile?.specialisations ?? []).join(", "),
       certifications: (company?.certifications ?? []).join(", "),
@@ -239,6 +242,7 @@ function ProfileEditDialog({
         name: form.company_name || "Mijn bedrijf",
         company_type: form.company_type || null,
         city: form.city || null,
+        region: form.region || null,
         employees: form.employees ? Number(form.employees) : null,
         certifications: certs,
         recent_projects: projects,
@@ -262,6 +266,7 @@ function ProfileEditDialog({
           id: user.id,
           full_name: form.full_name || null,
           specialisations: specs,
+          region: form.region || null,
           company_id: companyId,
         }, { onConflict: "id" });
       if (pErr) throw pErr;
@@ -296,9 +301,19 @@ function ProfileEditDialog({
               <Input value={form.company_type} onChange={(e) => setForm({ ...form, company_type: e.target.value })} placeholder="Bv. Algemeen aannemer" />
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Field label="Locatie (stad)">
               <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            </Field>
+            <Field label="Provincie">
+              <select
+                value={form.region}
+                onChange={(e) => setForm({ ...form, region: e.target.value })}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none"
+              >
+                <option value="">—</option>
+                {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
             </Field>
             <Field label="Aantal medewerkers">
               <Input type="number" min="0" value={form.employees} onChange={(e) => setForm({ ...form, employees: e.target.value })} />
