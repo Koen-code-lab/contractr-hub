@@ -6,21 +6,25 @@ import { Briefcase } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/plaats-opdracht")({
   component: PlaatsOpdracht,
 });
 
 const EXPERTISES = ["Funderingen", "Ruwbouw", "Dakwerken", "Sanitair", "Elektriciteit", "HVAC", "Afwerking", "Grondwerken"];
+const URGENCIES = ["Niet dringend", "Binnen 1 maand", "Binnen 2 weken", "Spoed"];
 
 function PlaatsOpdracht() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Nieuwbouw");
+  const [region, setRegion] = useState("");
   const [location, setLocation] = useState("");
   const [budget, setBudget] = useState("");
   const [startDate, setStartDate] = useState("");
+  const [urgency, setUrgency] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
