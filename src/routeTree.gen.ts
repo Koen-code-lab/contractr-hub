@@ -22,6 +22,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBiedCapaciteitAanRouteImport } from './routes/_app.bied-capaciteit-aan'
 import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
 import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
+import { Route as AppBedrijvenCompanyIdRouteImport } from './routes/_app.bedrijven.$companyId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -87,6 +88,11 @@ const AppBekijkOpdrachtenRoute = AppBekijkOpdrachtenRouteImport.update({
   path: '/bekijk-opdrachten',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBedrijvenCompanyIdRoute = AppBedrijvenCompanyIdRouteImport.update({
+  id: '/bedrijven/$companyId',
+  path: '/bedrijven/$companyId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/_app/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/_app/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/mijn-publicaties'
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
+    | '/bedrijven/$companyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/mijn-publicaties'
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
+    | '/bedrijven/$companyId'
   id:
     | '__root__'
     | '/'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/_app/mijn-publicaties'
     | '/_app/plaats-opdracht'
     | '/_app/zoek-capaciteit'
+    | '/_app/bedrijven/$companyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -277,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBekijkOpdrachtenRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/bedrijven/$companyId': {
+      id: '/_app/bedrijven/$companyId'
+      path: '/bedrijven/$companyId'
+      fullPath: '/bedrijven/$companyId'
+      preLoaderRoute: typeof AppBedrijvenCompanyIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -291,6 +310,7 @@ interface AppRouteChildren {
   AppMijnPublicatiesRoute: typeof AppMijnPublicatiesRoute
   AppPlaatsOpdrachtRoute: typeof AppPlaatsOpdrachtRoute
   AppZoekCapaciteitRoute: typeof AppZoekCapaciteitRoute
+  AppBedrijvenCompanyIdRoute: typeof AppBedrijvenCompanyIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -304,6 +324,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMijnPublicatiesRoute: AppMijnPublicatiesRoute,
   AppPlaatsOpdrachtRoute: AppPlaatsOpdrachtRoute,
   AppZoekCapaciteitRoute: AppZoekCapaciteitRoute,
+  AppBedrijvenCompanyIdRoute: AppBedrijvenCompanyIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

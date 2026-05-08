@@ -116,16 +116,18 @@ function CompanyProfile() {
           )}
         </div>
 
-        {(c.specialisations?.length ?? 0) > 0 && (
-          <div className="mt-6">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Specialisaties</div>
-            <div className="flex flex-wrap gap-2">
-              {c.specialisations.map((s: string) => (
-                <span key={s} className="px-3 py-1 rounded-full bg-muted text-sm">{s}</span>
-              ))}
+        {(() => {
+          const specs = (c as { specialisations?: string[] }).specialisations ?? [];
+          if (specs.length === 0) return null;
+          return (
+            <div className="mt-6">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Specialisaties</div>
+              <div className="flex flex-wrap gap-2">
+                {specs.map((s) => <span key={s} className="px-3 py-1 rounded-full bg-muted text-sm">{s}</span>)}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
         {(c.certifications?.length ?? 0) > 0 && (
           <div className="mt-6">
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Certificaten</div>
