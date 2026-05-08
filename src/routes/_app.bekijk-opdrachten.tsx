@@ -70,10 +70,13 @@ function BekijkOpdrachten() {
         <div className="space-y-4">
           {isLoading && <LoadingState />}
           {error && <ErrorState error={error} />}
-          {!isLoading && !error && data && data.length === 0 && (
-            <EmptyState title="Nog geen opdrachten" description="Er zijn momenteel geen opdrachten gepubliceerd." />
+          {!isLoading && !error && filtered.length === 0 && (
+            <EmptyState
+              title="Geen opdrachten gevonden"
+              description={filter === "all" ? "Er zijn momenteel geen opdrachten gepubliceerd." : "Geen opdrachten met deze status."}
+            />
           )}
-          {data?.map((o) => {
+          {filtered.map((o) => {
             const company = (o as { company?: { name?: string } }).company;
             return (
               <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 transition-all">
