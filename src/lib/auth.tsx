@@ -19,6 +19,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
     // Listener first
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
