@@ -142,23 +142,29 @@ export type Database = {
       }
       connections: {
         Row: {
-          addressee_id: string
+          addressee_company_id: string | null
+          addressee_id: string | null
           created_at: string
           id: string
+          requester_company_id: string | null
           requester_id: string
           status: string
         }
         Insert: {
-          addressee_id: string
+          addressee_company_id?: string | null
+          addressee_id?: string | null
           created_at?: string
           id?: string
+          requester_company_id?: string | null
           requester_id: string
           status?: string
         }
         Update: {
-          addressee_id?: string
+          addressee_company_id?: string | null
+          addressee_id?: string | null
           created_at?: string
           id?: string
+          requester_company_id?: string | null
           requester_id?: string
           status?: string
         }
@@ -170,21 +176,24 @@ export type Database = {
           id: string
           last_message_at: string
           participant_a: string
-          participant_b: string
+          participant_b: string | null
+          target_company_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           last_message_at?: string
           participant_a: string
-          participant_b: string
+          participant_b?: string | null
+          target_company_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           last_message_at?: string
           participant_a?: string
-          participant_b?: string
+          participant_b?: string | null
+          target_company_id?: string | null
         }
         Relationships: []
       }
