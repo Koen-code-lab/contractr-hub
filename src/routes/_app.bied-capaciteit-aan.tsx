@@ -6,6 +6,7 @@ import { HardHat } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
@@ -17,7 +18,7 @@ function BiedCapaciteitAan() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [title, setTitle] = useState("");
   const [specialisation, setSpecialisation] = useState("Ruwbouw");
-  const [region, setRegion] = useState("Heel België");
+  const [region, setRegion] = useState("");
   const [availableFrom, setAvailableFrom] = useState("");
   const [rate, setRate] = useState("");
   const [description, setDescription] = useState("");
