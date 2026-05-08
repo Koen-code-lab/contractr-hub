@@ -2,15 +2,38 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 
-export function usePublicationsByType(type: "opdracht" | "capaciteit") {
+export type ProjectFilters = {
+  category?: string;
+  region?: string;
+  keyword?: string;
+  status?: string;
+  sort?: "newest" | "relevance";
+};
+
+export type CapacityFilters = {
+  specialisations?: string[];
+  region?: string;
+  keyword?: string;
+  availableFrom?: string; // ISO date — return posts available_from <= this date
+  sort?: "newest" | "available";
+};
+
+export function useProjects(filters: ProjectFilters = {}) {
   return useQuery({
-    queryKey: ["publications", type],
+    queryKey: ["projects", filters],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("publications")
-        .select("*, company:companies(id, name, region, verified)")
-        .eq("type", type)
-        .order("created_at", { ascending: false });
+      let q = supabase
+        .from("projects")
+        .select("*, company:companies(id, name, region, verified, logo_url)");
+      if (filters.category) q = q.eq("category", filters.category);
+      if (filters.region) q = q.eq("region", filters.region);
+      if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
+      if (filters.keyword?.trim()) {
+        const k = filters.keyword.trim();
+        q = q.or(`title.ilike.%${k}%,description.ilike.%${k}%,location.ilike.%${k}%`);
+      }
+      q = q.order("created_at", { ascending: false });
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
@@ -34,14 +57,24 @@ export function useMyPublications() {
   });
 }
 
-export function useCapacityPosts() {
+export function useCapacityPosts(filters: CapacityFilters = {}) {
   return useQuery({
-    queryKey: ["capacity_posts"],
+    queryKey: ["capacity_posts", filters],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("capacity_posts")
-        .select("*, company:companies(id, name, region, verified)")
-        .order("created_at", { ascending: false });
+        .select("*, company:companies(id, name, region, verified, logo_url)");
+      if (filters.specialisations?.length) q = q.in("specialisation", filters.specialisations);
+      if (filters.region) q = q.eq("region", filters.region);
+      if (filters.availableFrom) q = q.lte("available_from", filters.availableFrom);
+      if (filters.keyword?.trim()) {
+        const k = filters.keyword.trim();
+        q = q.or(`title.ilike.%${k}%,description.ilike.%${k}%,specialisation.ilike.%${k}%`);
+      }
+      q = filters.sort === "available"
+        ? q.order("available_from", { ascending: true, nullsFirst: false })
+        : q.order("created_at", { ascending: false });
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
@@ -90,6 +123,85 @@ export function useCompanies() {
         .from("companies")
         .select("*")
         .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useCompany(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ["company", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("id", companyId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCompanyProjects(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ["company-projects", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("company_id", companyId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useCompanyCapacity(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ["company-capacity", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("capacity_posts")
+        .select("*")
+        .eq("company_id", companyId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useCompanyMembers(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ["company-members", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .eq("company_id", companyId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useConnections() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["connections", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("connections")
+        .select("*")
+        .or(`requester_id.eq.${user!.id},addressee_id.eq.${user!.id}`);
       if (error) throw error;
       return data ?? [];
     },

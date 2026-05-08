@@ -6,21 +6,25 @@ import { Briefcase } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/plaats-opdracht")({
   component: PlaatsOpdracht,
 });
 
 const EXPERTISES = ["Funderingen", "Ruwbouw", "Dakwerken", "Sanitair", "Elektriciteit", "HVAC", "Afwerking", "Grondwerken"];
+const URGENCIES = ["Niet dringend", "Binnen 1 maand", "Binnen 2 weken", "Spoed"];
 
 function PlaatsOpdracht() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Nieuwbouw");
+  const [region, setRegion] = useState("");
   const [location, setLocation] = useState("");
   const [budget, setBudget] = useState("");
   const [startDate, setStartDate] = useState("");
+  const [urgency, setUrgency] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
@@ -35,10 +39,10 @@ function PlaatsOpdracht() {
       toast.error("Log in om een opdracht te plaatsen.");
       return;
     }
-    if (!title.trim()) {
-      toast.error("Geef je opdracht een naam.");
-      return;
-    }
+    if (!title.trim()) { toast.error("Geef je opdracht een naam."); return; }
+    if (!category) { toast.error("Kies een categorie."); return; }
+    if (!region) { toast.error("Kies een provincie."); return; }
+    if (!startDate) { toast.error("Kies een startdatum."); return; }
     setSubmitting(true);
     const desc = [description.trim(), tags.length ? `\n\nVereiste expertise: ${tags.join(", ")}` : ""].join("");
     const { data, error } = await supabase
@@ -48,9 +52,11 @@ function PlaatsOpdracht() {
         title: title.trim(),
         description: desc || null,
         category,
+        region,
         location: location || null,
         budget_max: budget ? Number(budget) : null,
-        start_date: startDate || null,
+        start_date: startDate,
+        urgency: urgency || null,
         status,
       })
       .select("id")
@@ -106,12 +112,12 @@ function PlaatsOpdracht() {
       <div className="grid lg:grid-cols-3 gap-6">
         <form onSubmit={(e) => submit("actief", e)} className="lg:col-span-2 bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
           <div>
-            <label className="text-sm font-medium block mb-2">Projectnaam</label>
+            <label className="text-sm font-medium block mb-2">Projectnaam *</label>
             <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Bv. Renovatie kantoorpand Centrum" />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium block mb-2">Type werk</label>
+              <label className="text-sm font-medium block mb-2">Categorie *</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
                 <option>Nieuwbouw</option>
                 <option>Renovatie</option>
@@ -120,16 +126,30 @@ function PlaatsOpdracht() {
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Locatie</label>
+              <label className="text-sm font-medium block mb-2">Provincie *</label>
+              <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
+                <option value="">Kies provincie...</option>
+                {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium block mb-2">Startdatum *</label>
+              <input value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
+            </div>
+            <div>
+              <label className="text-sm font-medium block mb-2">Urgentie</label>
+              <select value={urgency} onChange={(e) => setUrgency(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
+                <option value="">—</option>
+                {URGENCIES.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium block mb-2">Locatie (stad)</label>
               <input value={location} onChange={(e) => setLocation(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" placeholder="Adres of stad" />
             </div>
             <div>
               <label className="text-sm font-medium block mb-2">Budget (€)</label>
               <input value={budget} onChange={(e) => setBudget(e.target.value)} type="number" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" placeholder="240000" />
-            </div>
-            <div>
-              <label className="text-sm font-medium block mb-2">Startdatum</label>
-              <input value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
             </div>
           </div>
           <div>

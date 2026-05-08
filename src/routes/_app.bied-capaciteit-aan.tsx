@@ -6,6 +6,7 @@ import { HardHat } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
@@ -17,7 +18,7 @@ function BiedCapaciteitAan() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [title, setTitle] = useState("");
   const [specialisation, setSpecialisation] = useState("Ruwbouw");
-  const [region, setRegion] = useState("Heel België");
+  const [region, setRegion] = useState("");
   const [availableFrom, setAvailableFrom] = useState("");
   const [rate, setRate] = useState("");
   const [description, setDescription] = useState("");
@@ -29,10 +30,10 @@ function BiedCapaciteitAan() {
       toast.error("Log in om capaciteit aan te bieden.");
       return;
     }
-    if (!title.trim()) {
-      toast.error("Geef je publicatie een titel.");
-      return;
-    }
+    if (!title.trim()) { toast.error("Geef je publicatie een titel."); return; }
+    if (!specialisation) { toast.error("Kies een categorie."); return; }
+    if (!region) { toast.error("Kies een provincie."); return; }
+    if (!availableFrom) { toast.error("Kies een beschikbaarheidsdatum."); return; }
     setSubmitting(true);
     const { error } = await supabase.from("capacity_posts").insert({
       created_by: user.id,
@@ -78,16 +79,14 @@ function BiedCapaciteitAan() {
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Regio</label>
+              <label className="text-sm font-medium block mb-2">Provincie *</label>
               <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
-                <option>Heel België</option>
-                <option>Vlaanderen</option>
-                <option>Wallonië</option>
-                <option>Brussel</option>
+                <option value="">Kies provincie...</option>
+                {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Beschikbaar vanaf</label>
+              <label className="text-sm font-medium block mb-2">Beschikbaar vanaf *</label>
               <input value={availableFrom} onChange={(e) => setAvailableFrom(e.target.value)} type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
             </div>
             <div>

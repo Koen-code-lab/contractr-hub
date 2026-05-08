@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { RegionActivity } from "@/components/RegionActivity";
-import { Briefcase, MapPin, Calendar, Building2, Circle } from "lucide-react";
-import { usePublicationsByType } from "@/lib/queries";
+import { Briefcase, MapPin, Calendar, Building2, Circle, Search } from "lucide-react";
+import { useProjects, type ProjectFilters } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
+import { BELGIAN_REGIONS } from "@/lib/regions";
 
 export const Route = createFileRoute("/_app/bekijk-opdrachten")({
   component: BekijkOpdrachten,
@@ -23,12 +23,7 @@ const statusColor: Record<string, string> = {
   verlopen: "text-muted-foreground",
 };
 
-const FILTERS: { label: string; value: "all" | "actief" | "in_gesprek" | "gesloten" }[] = [
-  { label: "Alle", value: "all" },
-  { label: "Open", value: "actief" },
-  { label: "In gesprek", value: "in_gesprek" },
-  { label: "Toegewezen", value: "gesloten" },
-];
+const CATEGORIES = ["Nieuwbouw", "Renovatie", "Onderhoud", "Infrastructuur"];
 
 function formatBudget(b: number | null | undefined) {
   if (b == null) return "—";
@@ -36,48 +31,93 @@ function formatBudget(b: number | null | undefined) {
 }
 
 function BekijkOpdrachten() {
-  const { data, isLoading, error } = usePublicationsByType("opdracht");
-  const [filter, setFilter] = useState<"all" | "actief" | "in_gesprek" | "gesloten">("all");
-
-  const filtered = useMemo(
-    () => (filter === "all" ? data ?? [] : (data ?? []).filter((o) => o.status === filter)),
-    [data, filter],
-  );
+  const [draft, setDraft] = useState<ProjectFilters>({ status: "actief" });
+  const [active, setActive] = useState<ProjectFilters>({ status: "actief" });
+  const { data, isLoading, error } = useProjects(active);
 
   return (
     <>
       <PageHeader
         title="Bekijk opdrachten"
         subtitle="Ontdek lopende aanbestedingen en projecten waar je op kan bieden."
-        actions={
-          <div className="flex gap-2 flex-wrap">
-            {FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  filter === f.value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        }
       />
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+      <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+        <aside className="bg-card rounded-2xl border border-border shadow-card p-5 h-fit lg:sticky lg:top-24 space-y-5">
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Zoeken</div>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={draft.keyword ?? ""}
+                onChange={(e) => setDraft({ ...draft, keyword: e.target.value })}
+                placeholder="Trefwoord..."
+                className="w-full h-10 pl-10 pr-3 rounded-xl bg-muted text-sm outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Categorie</div>
+            <select
+              value={draft.category ?? ""}
+              onChange={(e) => setDraft({ ...draft, category: e.target.value || undefined })}
+              className="w-full h-10 px-3 rounded-xl bg-muted text-sm outline-none"
+            >
+              <option value="">Alle categorieën</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Provincie</div>
+            <select
+              value={draft.region ?? ""}
+              onChange={(e) => setDraft({ ...draft, region: e.target.value || undefined })}
+              className="w-full h-10 px-3 rounded-xl bg-muted text-sm outline-none"
+            >
+              <option value="">Alle provincies</option>
+              {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Status</div>
+            <select
+              value={draft.status ?? "all"}
+              onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+              className="w-full h-10 px-3 rounded-xl bg-muted text-sm outline-none"
+            >
+              <option value="all">Alle</option>
+              <option value="actief">Open</option>
+              <option value="in_gesprek">In gesprek</option>
+              <option value="gesloten">Toegewezen</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => setActive(draft)}
+              className="w-full h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"
+            >
+              Filter toepassen
+            </button>
+            <button
+              onClick={() => { const reset = { status: "actief" } as ProjectFilters; setDraft(reset); setActive(reset); }}
+              className="w-full h-9 rounded-xl bg-muted text-sm font-medium hover:bg-secondary"
+            >
+              Wis filters
+            </button>
+          </div>
+        </aside>
+
         <div className="space-y-4">
           {isLoading && <LoadingState />}
           {error && <ErrorState error={error} />}
-          {!isLoading && !error && filtered.length === 0 && (
+          {!isLoading && !error && (data?.length ?? 0) === 0 && (
             <EmptyState
               title="Geen opdrachten gevonden"
-              description={filter === "all" ? "Er zijn momenteel geen opdrachten gepubliceerd." : "Geen opdrachten met deze status."}
+              description="Er zijn momenteel geen opdrachten die aan je filters voldoen."
             />
           )}
-          {filtered.map((o) => {
-            const company = (o as { company?: { name?: string } }).company;
+          {data?.map((o) => {
+            const company = (o as { company?: { id?: string; name?: string } }).company;
             return (
               <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 transition-all">
                 <div className="flex flex-wrap items-start gap-4 justify-between">
@@ -91,16 +131,24 @@ function BekijkOpdrachten() {
                         <span className={`text-xs font-semibold uppercase tracking-wider ${statusColor[o.status] ?? ""}`}>
                           {statusLabel[o.status] ?? o.status}
                         </span>
+                        {o.urgency && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">{o.urgency}</span>
+                        )}
                       </div>
                       <h3 className="font-display font-semibold text-lg leading-tight">{o.title}</h3>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <Building2 className="w-3.5 h-3.5" /> {company?.name ?? "—"}
-                      </div>
-                      {o.tags?.length > 0 && (
+                      {company?.name && (
+                        <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                          <Building2 className="w-3.5 h-3.5" />
+                          {company.id ? (
+                            <Link to="/bedrijven/$companyId" params={{ companyId: company.id }} className="hover:underline">
+                              {company.name}
+                            </Link>
+                          ) : company.name}
+                        </div>
+                      )}
+                      {o.category && (
                         <div className="flex flex-wrap gap-2 mt-3">
-                          {o.tags.map((t: string) => (
-                            <span key={t} className="px-2.5 py-1 rounded-full bg-muted text-xs font-medium">{t}</span>
-                          ))}
+                          <span className="px-2.5 py-1 rounded-full bg-muted text-xs font-medium">{o.category}</span>
                         </div>
                       )}
                     </div>
@@ -108,22 +156,24 @@ function BekijkOpdrachten() {
                   <div className="flex flex-col items-end gap-3">
                     <div className="text-right">
                       <div className="text-xs text-muted-foreground">Budget</div>
-                      <div className="text-xl font-display font-bold">{formatBudget(o.budget)}</div>
+                      <div className="text-xl font-display font-bold">{formatBudget(o.budget_max)}</div>
                     </div>
-                    <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</button>
+                    {company?.id ? (
+                      <Link to="/bedrijven/$companyId" params={{ companyId: company.id }} className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</Link>
+                    ) : (
+                      <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</button>
+                    )}
                   </div>
                 </div>
                 <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">
+                  {o.region && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {o.region}</span>}
                   {o.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {o.location}</span>}
                   {o.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline {new Date(o.deadline).toLocaleDateString("nl-BE")}</span>}
+                  {o.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Start {new Date(o.start_date).toLocaleDateString("nl-BE")}</span>}
                 </div>
               </div>
             );
           })}
-        </div>
-
-        <div className="space-y-4">
-          <RegionActivity className="lg:sticky lg:top-24" />
         </div>
       </div>
     </>
