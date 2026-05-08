@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { MapPin, HardHat, Search, Calendar } from "lucide-react";
-import { usePublicationsByType } from "@/lib/queries";
+import { useCapacityPosts } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
@@ -13,7 +13,7 @@ const specialiteiten = ["Funderingen", "Metselwerken", "Dakwerken", "Elektricite
 const regios = ["Antwerpen", "Brussel", "Oost-Vlaanderen", "West-Vlaanderen", "Limburg", "Vlaams-Brabant", "Henegouwen", "Luik"];
 
 function ZoekCapaciteit() {
-  const { data, isLoading, error } = usePublicationsByType("capaciteit");
+  const { data, isLoading, error } = useCapacityPosts();
 
   return (
     <>
