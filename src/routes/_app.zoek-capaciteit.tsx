@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_app/zoek-capaciteit")({
 });
 
 const specialiteiten = ["Funderingen", "Metselwerken", "Dakwerken", "Elektriciteit", "Sanitair", "Afwerking", "Hijsen / Kranen", "Wegenwerken"];
-const regios = ["Antwerpen", "Brussel", "Oost-Vlaanderen", "West-Vlaanderen", "Limburg", "Vlaams-Brabant", "Henegouwen", "Luik"];
+const regios = BELGIAN_REGIONS;
 const beschikbaarheden = ["Direct", "Deze week", "Deze maand", "Volgend kwartaal"] as const;
 type Beschikbaarheid = (typeof beschikbaarheden)[number];
 
