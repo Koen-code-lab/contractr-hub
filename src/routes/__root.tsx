@@ -72,6 +72,16 @@ function RootComponent() {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
   }));
+  if (supabaseConfigError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-lg text-center">
+          <h1 className="text-2xl font-semibold text-foreground">Configuratiefout</h1>
+          <p className="mt-3 text-sm text-muted-foreground">{supabaseConfigError}</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
