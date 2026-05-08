@@ -266,6 +266,7 @@ function ProfileEditDialog({
           id: user.id,
           full_name: form.full_name || null,
           specialisations: specs,
+          region: form.region || null,
           company_id: companyId,
         }, { onConflict: "id" });
       if (pErr) throw pErr;
