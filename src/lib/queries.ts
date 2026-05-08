@@ -34,6 +34,54 @@ export function useMyPublications() {
   });
 }
 
+export function useCapacityPosts() {
+  return useQuery({
+    queryKey: ["capacity_posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("capacity_posts")
+        .select("*, company:companies(id, name, region, verified)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useMyCapacityPosts() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["my-capacity-posts", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("capacity_posts")
+        .select("*")
+        .eq("created_by", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useMyProjects() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["my-projects", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("created_by", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export function useCompanies() {
   return useQuery({
     queryKey: ["companies"],

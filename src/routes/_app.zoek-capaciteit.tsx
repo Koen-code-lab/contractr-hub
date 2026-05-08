@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { MapPin, HardHat, Search, Calendar } from "lucide-react";
-import { usePublicationsByType } from "@/lib/queries";
+import { useCapacityPosts } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
@@ -13,7 +13,7 @@ const specialiteiten = ["Funderingen", "Metselwerken", "Dakwerken", "Elektricite
 const regios = ["Antwerpen", "Brussel", "Oost-Vlaanderen", "West-Vlaanderen", "Limburg", "Vlaams-Brabant", "Henegouwen", "Luik"];
 
 function ZoekCapaciteit() {
-  const { data, isLoading, error } = usePublicationsByType("capaciteit");
+  const { data, isLoading, error } = useCapacityPosts();
 
   return (
     <>
@@ -104,7 +104,7 @@ function ZoekCapaciteit() {
                     {p.region && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {p.region}</span>}
                   </div>
                   <div className="border-t border-border mt-4 pt-4 flex items-center justify-between">
-                    <div className="text-sm font-bold">{p.hourly_rate ? `€ ${p.hourly_rate}/u` : "Op aanvraag"}</div>
+                    <div className="text-sm font-bold">{p.capacity_value ? `€ ${p.capacity_value}/u` : "Op aanvraag"}</div>
                     <button className="text-sm font-semibold px-4 py-1.5 rounded-full bg-accent text-accent-foreground">Contacteer</button>
                   </div>
                 </div>
