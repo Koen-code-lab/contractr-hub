@@ -245,12 +245,12 @@ function ProfileEditDialog({
         description: form.description || null,
       };
 
+      const companiesTable = supabase.from("companies") as any;
       if (companyId) {
-        const { error } = await supabase.from("companies").update(companyPayload).eq("id", companyId);
+        const { error } = await companiesTable.update(companyPayload).eq("id", companyId);
         if (error) throw error;
       } else if (form.company_name.trim()) {
-        const { data, error } = await supabase
-          .from("companies").insert(companyPayload).select("id").single();
+        const { data, error } = await companiesTable.insert(companyPayload).select("id").single();
         if (error) throw error;
         companyId = data.id;
       }
