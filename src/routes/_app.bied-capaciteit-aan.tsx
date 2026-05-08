@@ -79,16 +79,14 @@ function BiedCapaciteitAan() {
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Regio</label>
+              <label className="text-sm font-medium block mb-2">Provincie *</label>
               <select value={region} onChange={(e) => setRegion(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none">
-                <option>Heel België</option>
-                <option>Vlaanderen</option>
-                <option>Wallonië</option>
-                <option>Brussel</option>
+                <option value="">Kies provincie...</option>
+                {BELGIAN_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Beschikbaar vanaf</label>
+              <label className="text-sm font-medium block mb-2">Beschikbaar vanaf *</label>
               <input value={availableFrom} onChange={(e) => setAvailableFrom(e.target.value)} type="date" className="w-full h-11 px-4 rounded-xl bg-muted text-sm outline-none" />
             </div>
             <div>
