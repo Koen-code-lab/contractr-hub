@@ -17,9 +17,20 @@ export function LoadingState({ label = "Laden…" }: { label?: string }) {
 
 export function ErrorState({ error }: { error: unknown }) {
   const msg = error instanceof Error ? error.message : "Er ging iets mis.";
+  const details =
+    error && typeof error === "object" && "details" in error
+      ? String((error as { details?: unknown }).details ?? "")
+      : "";
+  const hint =
+    error && typeof error === "object" && "hint" in error
+      ? String((error as { hint?: unknown }).hint ?? "")
+      : "";
   return (
-    <div className="bg-card rounded-2xl border border-destructive/30 p-6 text-sm text-destructive shadow-card">
-      {msg}
+    <div className="bg-card rounded-2xl border border-destructive/30 p-6 text-sm text-destructive shadow-card space-y-1">
+      <div className="font-semibold">Er ging iets mis</div>
+      <div className="opacity-90 break-words">{msg}</div>
+      {details && <div className="text-xs opacity-70 break-words">{details}</div>}
+      {hint && <div className="text-xs opacity-70 break-words">Hint: {hint}</div>}
     </div>
   );
 }
