@@ -1,12 +1,25 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { BadgeCheck, MapPin, Building2, Briefcase, HardHat, Users, MessageSquare, UserPlus, Calendar } from "lucide-react";
-import { useCompany, useCompanyProjects, useCompanyCapacity, useCompanyMembers, useConnections } from "@/lib/queries";
+import { BadgeCheck, MapPin, Building2, Briefcase, HardHat, Users, MessageSquare, UserPlus, Calendar, ArrowLeft } from "lucide-react";
+import {
+  useCompany,
+  useCompanyProjects,
+  useCompanyCapacity,
+  useCompanyMembers,
+  useConnections,
+} from "@/lib/queries";
 import { LoadingState, ErrorState, EmptyState } from "@/components/States";
 import { useAuth } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { getOrCreateConversation, pickCompanyRepresentative, requestConnection } from "@/lib/connections";
+import {
+  getOrCreateCompanyConversation,
+  requestCompanyConnection,
+  findCompanyConnection,
+  getMyCompanyId,
+  type ConnectionRow,
+} from "@/lib/connections";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/bedrijven/$companyId")({
@@ -24,27 +37,32 @@ function CompanyProfile() {
   const members = useCompanyMembers(companyId);
   const connections = useConnections();
   const [busy, setBusy] = useState<"connect" | "message" | null>(null);
+  const [myCompanyId, setMyCompanyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getMyCompanyId(user.id).then(setMyCompanyId).catch(() => setMyCompanyId(null));
+  }, [user]);
 
   if (company.isLoading) return <LoadingState />;
   if (company.error) return <ErrorState error={company.error} />;
   if (!company.data) return <EmptyState title="Bedrijf niet gevonden" description="Dit bedrijfsprofiel bestaat niet of is niet toegankelijk." />;
 
   const c = company.data;
-  const isMyCompany = !!user && (members.data ?? []).some((m) => m.id === user.id);
+  const isMyCompany = !!myCompanyId && myCompanyId === companyId;
+  const memberHasNoContact = !((members.data ?? []).some((m) => m.id !== user?.id));
 
-  const repId = (members.data ?? []).find((m) => m.id !== user?.id)?.id ?? null;
-  const existingConn = (connections.data ?? []).find(
-    (cn) =>
-      (cn.requester_id === user?.id && cn.addressee_id === repId) ||
-      (cn.addressee_id === user?.id && cn.requester_id === repId),
+  const existingConn: ConnectionRow | undefined = findCompanyConnection(
+    (connections.data ?? []) as ConnectionRow[],
+    myCompanyId,
+    companyId,
   );
 
   const handleConnect = async () => {
     if (!user) { toast.error("Log in om te verbinden."); return; }
-    if (!repId) { toast.error("Dit bedrijf heeft nog geen contactpersoon."); return; }
     setBusy("connect");
     try {
-      await requestConnection(user.id, repId);
+      await requestCompanyConnection(user.id, companyId);
       toast.success("Verbindingsverzoek verstuurd.");
       qc.invalidateQueries({ queryKey: ["connections"] });
     } catch (e) {
@@ -54,11 +72,12 @@ function CompanyProfile() {
 
   const handleMessage = async () => {
     if (!user) { toast.error("Log in om te berichten."); return; }
-    const target = repId ?? (await pickCompanyRepresentative(companyId, user.id));
-    if (!target) { toast.error("Dit bedrijf heeft nog geen contactpersoon."); return; }
     setBusy("message");
     try {
-      await getOrCreateConversation(user.id, target);
+      await getOrCreateCompanyConversation(user.id, companyId);
+      if (memberHasNoContact) {
+        toast.info("Nog geen contactpersoon beschikbaar. Stuur een algemeen bedrijfsbericht.");
+      }
       navigate({ to: "/berichten" });
     } catch (e) {
       toast.error((e as Error).message);
@@ -66,6 +85,13 @@ function CompanyProfile() {
   };
 
   const recentProjects = (c.recent_projects ?? []) as Array<{ name?: string; year?: string | number; location?: string }>;
+
+  const connectLabel =
+    existingConn?.status === "accepted"
+      ? "Verbonden"
+      : existingConn?.status === "pending"
+        ? "Verzoek verzonden"
+        : "Verbind";
 
   return (
     <>
@@ -95,25 +121,37 @@ function CompanyProfile() {
             </div>
             {c.description && <p className="text-sm mt-4 max-w-3xl">{c.description}</p>}
           </div>
-          {!isMyCompany && (
-            <div className="flex flex-col gap-2 w-full sm:w-auto">
-              <button
-                onClick={handleConnect}
-                disabled={busy !== null || !!existingConn}
-                className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
-              >
-                <UserPlus className="w-4 h-4" />
-                {existingConn?.status === "accepted" ? "Verbonden" : existingConn ? "Verzoek verstuurd" : "Verbind"}
-              </button>
-              <button
-                onClick={handleMessage}
-                disabled={busy !== null}
-                className="px-5 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
-              >
-                <MessageSquare className="w-4 h-4" /> Bericht
-              </button>
-            </div>
-          )}
+
+          <div className="flex flex-col gap-2 w-full sm:w-auto">
+            {isMyCompany ? (
+              <div className="px-4 py-2.5 rounded-full bg-muted text-sm font-medium text-muted-foreground text-center">
+                Dit is jouw bedrijfsprofiel.
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={handleConnect}
+                  disabled={busy !== null || !!existingConn}
+                  className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" /> {connectLabel}
+                </button>
+                <button
+                  onClick={handleMessage}
+                  disabled={busy !== null}
+                  className="px-5 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" /> Bericht
+                </button>
+              </>
+            )}
+            <Link
+              to="/mijn-netwerk"
+              className="px-5 py-2.5 rounded-full bg-muted text-sm font-semibold inline-flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" /> Terug naar netwerk
+            </Link>
+          </div>
         </div>
 
         {(() => {
@@ -195,7 +233,9 @@ function CompanyProfile() {
       )}
 
       <div className="mt-6">
-        <Link to="/mijn-netwerk" className="text-sm text-muted-foreground hover:underline">← Terug naar netwerk</Link>
+        <Link to="/mijn-netwerk" className="text-sm text-muted-foreground hover:underline inline-flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" /> Terug naar netwerk
+        </Link>
       </div>
     </>
   );
