@@ -1,12 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Briefcase, MapPin, Calendar, Building2, Circle, Search } from "lucide-react";
 import { useProjects, type ProjectFilters } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 
+type SearchParams = { region?: string; category?: string };
+
 export const Route = createFileRoute("/_app/bekijk-opdrachten")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    region: typeof s.region === "string" ? s.region : undefined,
+    category: typeof s.category === "string" ? s.category : undefined,
+  }),
   component: BekijkOpdrachten,
 });
 
