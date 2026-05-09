@@ -219,7 +219,48 @@ export function useConversations() {
         .select("*")
         .order("last_message_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const convos = data ?? [];
+      if (convos.length === 0) return [];
+
+      const companyIds = Array.from(new Set(convos.map((c) => c.target_company_id).filter(Boolean) as string[]));
+      const profileIds = Array.from(new Set(
+        convos.flatMap((c) => [c.participant_a, c.participant_b]).filter(Boolean) as string[],
+      ));
+
+      const [companiesRes, profilesRes] = await Promise.all([
+        companyIds.length
+          ? supabase.from("companies").select("id, name").in("id", companyIds)
+          : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+        profileIds.length
+          ? supabase.from("profiles").select("id, full_name, company_id").in("id", profileIds)
+          : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null }[] }),
+      ]);
+      const companyMap = new Map((companiesRes.data ?? []).map((c) => [c.id, c]));
+      const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.id, p]));
+
+      const enriched = await Promise.all(
+        convos.map(async (c) => {
+          const { data: last } = await supabase
+            .from("messages")
+            .select("body, created_at, sender_id")
+            .eq("conversation_id", c.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          const otherId = c.participant_a === user!.id ? c.participant_b : c.participant_a;
+          const otherProfile = otherId ? profileMap.get(otherId) : null;
+          const targetCompany = c.target_company_id ? companyMap.get(c.target_company_id) : null;
+          const otherCompany = otherProfile?.company_id ? companyMap.get(otherProfile.company_id) : null;
+          return {
+            ...c,
+            last_message: last,
+            target_company: targetCompany ?? null,
+            other_profile: otherProfile ?? null,
+            display_title: targetCompany?.name ?? otherCompany?.name ?? otherProfile?.full_name ?? "Gesprek",
+          };
+        }),
+      );
+      return enriched;
     },
   });
 }

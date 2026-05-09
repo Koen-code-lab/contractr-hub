@@ -1,4 +1,5 @@
 import { Activity, Briefcase, HardHat, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const regios = [
   { naam: "Antwerpen", capaciteit: 48, opdrachten: 12, matches: 9 },
@@ -19,7 +20,7 @@ export function RegionActivity({ className = "" }: { className?: string }) {
           <h3 className="font-display font-semibold text-lg flex items-center gap-2">
             <Activity className="w-4 h-4" /> Activiteit per regio
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Live overzicht in België</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Klik op een regio om te filteren</p>
         </div>
         <span className="text-xs px-2.5 py-1 rounded-full bg-accent/20 text-accent-foreground font-medium">Vandaag</span>
       </div>
@@ -32,15 +33,21 @@ export function RegionActivity({ className = "" }: { className?: string }) {
 
       <ul className="divide-y divide-border">
         {regios.map((r) => (
-          <li key={r.naam} className="grid grid-cols-3 items-center text-sm hover:bg-muted/30 transition-colors">
-            <div className="px-6 py-3 font-medium">{r.naam}</div>
-            <div className="px-3 py-3 text-right tabular-nums">{r.capaciteit}</div>
-            <div className="px-3 py-3 text-right tabular-nums flex items-center justify-end gap-2">
-              <span>{r.opdrachten}</span>
-              <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-medium">
-                <Sparkles className="w-2.5 h-2.5" /> {r.matches}
-              </span>
-            </div>
+          <li key={r.naam}>
+            <Link
+              to="/bekijk-opdrachten"
+              search={{ region: r.naam }}
+              className="grid grid-cols-3 items-center text-sm hover:bg-muted/30 transition-colors"
+            >
+              <div className="px-6 py-3 font-medium">{r.naam}</div>
+              <div className="px-3 py-3 text-right tabular-nums">{r.capaciteit}</div>
+              <div className="px-3 py-3 text-right tabular-nums flex items-center justify-end gap-2">
+                <span>{r.opdrachten}</span>
+                <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-medium">
+                  <Sparkles className="w-2.5 h-2.5" /> {r.matches}
+                </span>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>

@@ -1,12 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Briefcase, MapPin, Calendar, Building2, Circle, Search } from "lucide-react";
 import { useProjects, type ProjectFilters } from "@/lib/queries";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 
+type SearchParams = { region?: string; category?: string };
+
 export const Route = createFileRoute("/_app/bekijk-opdrachten")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    region: typeof s.region === "string" ? s.region : undefined,
+    category: typeof s.category === "string" ? s.category : undefined,
+  }),
   component: BekijkOpdrachten,
 });
 
@@ -31,8 +37,14 @@ function formatBudget(b: number | null | undefined) {
 }
 
 function BekijkOpdrachten() {
-  const [draft, setDraft] = useState<ProjectFilters>({ status: "actief" });
-  const [active, setActive] = useState<ProjectFilters>({ status: "actief" });
+  const search = Route.useSearch();
+  const initial: ProjectFilters = { status: "actief", region: search.region, category: search.category };
+  const [draft, setDraft] = useState<ProjectFilters>(initial);
+  const [active, setActive] = useState<ProjectFilters>(initial);
+  useEffect(() => {
+    const next: ProjectFilters = { status: "actief", region: search.region, category: search.category };
+    setDraft(next); setActive(next);
+  }, [search.region, search.category]);
   const { data, isLoading, error } = useProjects(active);
 
   return (
@@ -135,7 +147,7 @@ function BekijkOpdrachten() {
                           <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">{o.urgency}</span>
                         )}
                       </div>
-                      <h3 className="font-display font-semibold text-lg leading-tight">{o.title}</h3>
+                      <Link to="/opdracht/$projectId" params={{ projectId: o.id }} className="block hover:underline"><h3 className="font-display font-semibold text-lg leading-tight">{o.title}</h3></Link>
                       {company?.name && (
                         <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                           <Building2 className="w-3.5 h-3.5" />
@@ -158,11 +170,7 @@ function BekijkOpdrachten() {
                       <div className="text-xs text-muted-foreground">Budget</div>
                       <div className="text-xl font-display font-bold">{formatBudget(o.budget_max)}</div>
                     </div>
-                    {company?.id ? (
-                      <Link to="/bedrijven/$companyId" params={{ companyId: company.id }} className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</Link>
-                    ) : (
-                      <button className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</button>
-                    )}
+                    <Link to="/opdracht/$projectId" params={{ projectId: o.id }} className="px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold hover:opacity-90">Bekijk</Link>
                   </div>
                 </div>
                 <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">

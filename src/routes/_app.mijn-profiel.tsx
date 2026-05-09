@@ -80,13 +80,13 @@ function MijnProfiel() {
               <div className="w-32 h-32 rounded-3xl bg-card border-4 border-card shadow-elevated flex items-center justify-center text-3xl font-display font-bold bg-gradient-to-br from-accent to-accent/70">
                 {initials}
               </div>
-              <div className="pb-2">
+              <div className="pb-2" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-display font-bold">{profile?.full_name ?? "Mijn naam"}</h2>
+                  <h2 className="text-2xl font-display font-bold text-white">{profile?.full_name ?? "Mijn naam"}</h2>
                   <CheckCircle2 className="w-5 h-5 text-accent fill-accent/30" />
                 </div>
-                <div className="text-muted-foreground mt-1">{companyType} · {companyName}</div>
-                <div className="text-sm text-muted-foreground mt-2 flex flex-wrap gap-4">
+                <div className="text-white/80 mt-1">{companyType} · {companyName}</div>
+                <div className="text-sm text-white/70 mt-2 flex flex-wrap gap-4">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {companyCity}</span>
                   {employees != null && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {employees} medewerkers</span>}
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Sinds {profile?.created_at ? new Date(profile.created_at).getFullYear() : "—"}</span>

@@ -22,6 +22,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBiedCapaciteitAanRouteImport } from './routes/_app.bied-capaciteit-aan'
 import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
 import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
+import { Route as AppOpdrachtProjectIdRouteImport } from './routes/_app.opdracht.$projectId'
 import { Route as AppBedrijvenCompanyIdRouteImport } from './routes/_app.bedrijven.$companyId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -88,6 +89,11 @@ const AppBekijkOpdrachtenRoute = AppBekijkOpdrachtenRouteImport.update({
   path: '/bekijk-opdrachten',
   getParentRoute: () => AppRoute,
 } as any)
+const AppOpdrachtProjectIdRoute = AppOpdrachtProjectIdRouteImport.update({
+  id: '/opdracht/$projectId',
+  path: '/opdracht/$projectId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBedrijvenCompanyIdRoute = AppBedrijvenCompanyIdRouteImport.update({
   id: '/bedrijven/$companyId',
   path: '/bedrijven/$companyId',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
+  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
+  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/_app/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
+  '/_app/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
     | '/bedrijven/$companyId'
+    | '/opdracht/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
     | '/bedrijven/$companyId'
+    | '/opdracht/$projectId'
   id:
     | '__root__'
     | '/'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_app/plaats-opdracht'
     | '/_app/zoek-capaciteit'
     | '/_app/bedrijven/$companyId'
+    | '/_app/opdracht/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -289,6 +301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBekijkOpdrachtenRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/opdracht/$projectId': {
+      id: '/_app/opdracht/$projectId'
+      path: '/opdracht/$projectId'
+      fullPath: '/opdracht/$projectId'
+      preLoaderRoute: typeof AppOpdrachtProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/bedrijven/$companyId': {
       id: '/_app/bedrijven/$companyId'
       path: '/bedrijven/$companyId'
@@ -311,6 +330,7 @@ interface AppRouteChildren {
   AppPlaatsOpdrachtRoute: typeof AppPlaatsOpdrachtRoute
   AppZoekCapaciteitRoute: typeof AppZoekCapaciteitRoute
   AppBedrijvenCompanyIdRoute: typeof AppBedrijvenCompanyIdRoute
+  AppOpdrachtProjectIdRoute: typeof AppOpdrachtProjectIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -325,6 +345,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPlaatsOpdrachtRoute: AppPlaatsOpdrachtRoute,
   AppZoekCapaciteitRoute: AppZoekCapaciteitRoute,
   AppBedrijvenCompanyIdRoute: AppBedrijvenCompanyIdRoute,
+  AppOpdrachtProjectIdRoute: AppOpdrachtProjectIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
