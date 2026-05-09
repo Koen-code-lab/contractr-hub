@@ -48,9 +48,9 @@ function OpdrachtDetail() {
   const isOwner = user?.id === data.created_by;
 
   const handleMessage = async () => {
-    if (!company?.id) { toast.error("Geen bedrijf gekoppeld."); return; }
+    if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
     try {
-      await getOrCreateCompanyConversation(company.id);
+      await getOrCreateCompanyConversation(user.id, company.id);
       navigate({ to: "/berichten" });
     } catch (e) {
       toast.error((e as Error).message);
