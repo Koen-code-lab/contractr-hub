@@ -147,7 +147,7 @@ function BekijkOpdrachten() {
                           <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">{o.urgency}</span>
                         )}
                       </div>
-                      <h3 className="font-display font-semibold text-lg leading-tight">{o.title}</h3>
+                      <Link to="/opdracht/$projectId" params={{ projectId: o.id }} className="block hover:underline"><h3 className="font-display font-semibold text-lg leading-tight">{o.title}</h3></Link>
                       {company?.name && (
                         <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                           <Building2 className="w-3.5 h-3.5" />
