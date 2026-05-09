@@ -1,4 +1,5 @@
 import { Activity, Briefcase, HardHat, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const regios = [
   { naam: "Antwerpen", capaciteit: 48, opdrachten: 12, matches: 9 },
@@ -19,7 +20,7 @@ export function RegionActivity({ className = "" }: { className?: string }) {
           <h3 className="font-display font-semibold text-lg flex items-center gap-2">
             <Activity className="w-4 h-4" /> Activiteit per regio
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Live overzicht in België</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Klik op een regio om te filteren</p>
         </div>
         <span className="text-xs px-2.5 py-1 rounded-full bg-accent/20 text-accent-foreground font-medium">Vandaag</span>
       </div>
