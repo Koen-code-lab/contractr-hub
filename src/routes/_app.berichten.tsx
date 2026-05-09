@@ -49,6 +49,9 @@ function Berichten() {
             )}
             {conversations?.map((c) => {
               const isActive = c.id === currentId;
+              const title = (c as { display_title?: string }).display_title ?? "Gesprek";
+              const last = (c as { last_message?: { body: string; created_at: string } | null }).last_message;
+              const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
               return (
                 <button
                   key={c.id}
@@ -57,12 +60,17 @@ function Berichten() {
                 >
                   <div className="flex gap-3">
                     <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold shrink-0">
-                      {c.id.slice(0, 2).toUpperCase()}
+                      {initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm truncate">Gesprek</div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(c.last_message_at).toLocaleDateString("nl-BE")}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-semibold text-sm truncate">{title}</div>
+                        <div className="text-[10px] text-muted-foreground shrink-0">
+                          {new Date(last?.created_at ?? c.last_message_at).toLocaleDateString("nl-BE", { day: "2-digit", month: "short" })}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate mt-0.5">
+                        {last?.body ?? "Nog geen berichten"}
                       </div>
                     </div>
                   </div>
