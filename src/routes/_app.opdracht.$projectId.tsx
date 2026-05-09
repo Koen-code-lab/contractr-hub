@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingState, ErrorState, EmptyState } from "@/components/States";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft, Briefcase, MapPin, Calendar, Building2, Circle, MessageSquare, Edit } from "lucide-react";
-import { getOrCreateCompanyConversation } from "@/lib/connections";
+import { ArrowLeft, Briefcase, MapPin, Calendar, Building2, Circle, MessageSquare, Edit, UserPlus, Sparkles } from "lucide-react";
+import { getOrCreateCompanyConversation, requestCompanyConnection } from "@/lib/connections";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/opdracht/$projectId")({
@@ -22,10 +23,22 @@ function formatBudget(b: number | null | undefined) {
   return new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(b));
 }
 
+function normalizeTitle(s: string | null | undefined) {
+  if (!s) return "";
+  return s.replace(/[\s.,;:!?]+$/u, "").trim();
+}
+
+function mapsUrl(city?: string | null, region?: string | null) {
+  const q = (city && city.trim()) || (region && `${region}, België`) || "";
+  if (!q) return null;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
 function OpdrachtDetail() {
   const { projectId } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [busy, setBusy] = useState<"msg" | "connect" | "interest" | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["project", projectId],
@@ -46,21 +59,49 @@ function OpdrachtDetail() {
 
   const company = (data as { company?: { id: string; name: string } | null }).company ?? null;
   const isOwner = user?.id === data.created_by;
+  const title = normalizeTitle(data.title);
+  const locUrl = mapsUrl(data.location, data.region);
 
   const handleMessage = async () => {
     if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    setBusy("msg");
     try {
       await getOrCreateCompanyConversation(user.id, company.id);
       navigate({ to: "/berichten" });
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
+  };
+
+  const handleConnect = async () => {
+    if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    setBusy("connect");
+    try {
+      await requestCompanyConnection(user.id, company.id);
+      toast.success("Verzoek verzonden.");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
+  };
+
+  const handleInterest = async () => {
+    if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    setBusy("interest");
+    try {
+      const conversationId = await getOrCreateCompanyConversation(user.id, company.id);
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        body: `Hallo, ik heb interesse in uw opdracht "${title}". Graag verneem ik meer details.`,
+      });
+      toast.success("Interesse verstuurd.");
+      navigate({ to: "/berichten" });
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
   };
 
   return (
     <>
       <PageHeader
-        title={data.title}
+        title={title}
         subtitle={data.category ?? undefined}
         actions={
           <Link to="/bekijk-opdrachten" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium">
@@ -85,7 +126,7 @@ function OpdrachtDetail() {
                   <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">{data.urgency}</span>
                 )}
               </div>
-              <h2 className="font-display font-bold text-2xl leading-tight">{data.title}</h2>
+              <h2 className="font-display font-bold text-2xl leading-tight">{title}</h2>
               {company?.name && (
                 <div className="text-sm text-muted-foreground flex items-center gap-1 mt-2">
                   <Building2 className="w-3.5 h-3.5" />
@@ -100,20 +141,42 @@ function OpdrachtDetail() {
               <div className="text-2xl font-display font-bold">{formatBudget(data.budget_max)}</div>
             </div>
             {isOwner ? (
-              <Link to="/mijn-publicaties" className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                <Edit className="w-4 h-4" /> Beheer
+              <Link
+                to="/mijn-publicaties/$projectId/edit"
+                params={{ projectId }}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
+              >
+                <Edit className="w-4 h-4" /> Bewerk opdracht
               </Link>
             ) : (
-              <button onClick={handleMessage} className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold">
-                <MessageSquare className="w-4 h-4" /> Bericht
-              </button>
+              <div className="flex flex-wrap gap-2 justify-end">
+                <button onClick={handleInterest} disabled={busy !== null} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50">
+                  <Sparkles className="w-4 h-4" /> Interesse tonen
+                </button>
+                <button onClick={handleMessage} disabled={busy !== null} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+                  <MessageSquare className="w-4 h-4" /> Bericht
+                </button>
+                <button onClick={handleConnect} disabled={busy !== null} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-50">
+                  <UserPlus className="w-4 h-4" /> Verbind
+                </button>
+              </div>
             )}
           </div>
         </div>
 
         <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">
-          {data.region && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {data.region}</span>}
-          {data.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {data.location}</span>}
+          {locUrl ? (
+            <a href={locUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-foreground hover:underline">
+              <MapPin className="w-4 h-4" /> {data.location || data.region}
+            </a>
+          ) : (
+            (data.location || data.region) && (
+              <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {data.location || data.region}</span>
+            )
+          )}
+          {data.location && data.region && data.location !== data.region && (
+            <span className="flex items-center gap-1.5 text-xs">({data.region})</span>
+          )}
           {data.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline {new Date(data.deadline).toLocaleDateString("nl-BE")}</span>}
           {data.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Start {new Date(data.start_date).toLocaleDateString("nl-BE")}</span>}
         </div>
