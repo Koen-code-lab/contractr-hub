@@ -42,12 +42,13 @@ function MijnPublicaties() {
   const error = projects.error ?? capacity.error;
 
   const data = useMemo<Row[]>(() => {
+    const norm = (t: string) => t.replace(/[\s.,;:!?]+$/u, "").trim();
     const rows: Row[] = [
       ...(projects.data ?? []).map((p) => ({
-        id: p.id, title: p.title, type: "opdracht" as const, status: p.status, created_at: p.created_at,
+        id: p.id, title: norm(p.title), type: "opdracht" as const, status: p.status, created_at: p.created_at,
       })),
       ...(capacity.data ?? []).map((c) => ({
-        id: c.id, title: c.title, type: "capaciteit" as const,
+        id: c.id, title: norm(c.title), type: "capaciteit" as const,
         status: (c as { status?: string }).status ?? "actief",
         created_at: c.created_at,
       })),
@@ -181,11 +182,20 @@ function MijnPublicaties() {
                     <td className="px-6 py-4 text-muted-foreground">{new Date(p.created_at).toLocaleDateString("nl-BE")}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1 justify-end">
-                        <Link
-                          to={p.type === "opdracht" ? "/plaats-opdracht" : "/bied-capaciteit-aan"}
-                          title="Bewerken"
-                          className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
-                        ><Edit className="w-3.5 h-3.5" /></Link>
+                        {p.type === "opdracht" ? (
+                          <Link
+                            to="/mijn-publicaties/$projectId/edit"
+                            params={{ projectId: p.id }}
+                            title="Bewerken"
+                            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+                          ><Edit className="w-3.5 h-3.5" /></Link>
+                        ) : (
+                          <Link
+                            to="/bied-capaciteit-aan"
+                            title="Bewerken"
+                            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+                          ><Edit className="w-3.5 h-3.5" /></Link>
+                        )}
                         {isPaused ? (
                           <button onClick={() => setStatus(p, "actief")} title="Hervatten" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"><Play className="w-3.5 h-3.5" /></button>
                         ) : (
