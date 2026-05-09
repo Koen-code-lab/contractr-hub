@@ -181,11 +181,20 @@ function MijnPublicaties() {
                     <td className="px-6 py-4 text-muted-foreground">{new Date(p.created_at).toLocaleDateString("nl-BE")}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1 justify-end">
-                        <Link
-                          to={p.type === "opdracht" ? "/plaats-opdracht" : "/bied-capaciteit-aan"}
-                          title="Bewerken"
-                          className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
-                        ><Edit className="w-3.5 h-3.5" /></Link>
+                        {p.type === "opdracht" ? (
+                          <Link
+                            to="/mijn-publicaties/$projectId/edit"
+                            params={{ projectId: p.id }}
+                            title="Bewerken"
+                            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+                          ><Edit className="w-3.5 h-3.5" /></Link>
+                        ) : (
+                          <Link
+                            to="/bied-capaciteit-aan"
+                            title="Bewerken"
+                            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+                          ><Edit className="w-3.5 h-3.5" /></Link>
+                        )}
                         {isPaused ? (
                           <button onClick={() => setStatus(p, "actief")} title="Hervatten" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"><Play className="w-3.5 h-3.5" /></button>
                         ) : (
