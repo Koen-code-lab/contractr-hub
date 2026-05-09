@@ -37,8 +37,14 @@ function formatBudget(b: number | null | undefined) {
 }
 
 function BekijkOpdrachten() {
-  const [draft, setDraft] = useState<ProjectFilters>({ status: "actief" });
-  const [active, setActive] = useState<ProjectFilters>({ status: "actief" });
+  const search = Route.useSearch();
+  const initial: ProjectFilters = { status: "actief", region: search.region, category: search.category };
+  const [draft, setDraft] = useState<ProjectFilters>(initial);
+  const [active, setActive] = useState<ProjectFilters>(initial);
+  useEffect(() => {
+    const next: ProjectFilters = { status: "actief", region: search.region, category: search.category };
+    setDraft(next); setActive(next);
+  }, [search.region, search.category]);
   const { data, isLoading, error } = useProjects(active);
 
   return (
