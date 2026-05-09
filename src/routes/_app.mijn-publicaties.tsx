@@ -42,12 +42,13 @@ function MijnPublicaties() {
   const error = projects.error ?? capacity.error;
 
   const data = useMemo<Row[]>(() => {
+    const norm = (t: string) => t.replace(/[\s.,;:!?]+$/u, "").trim();
     const rows: Row[] = [
       ...(projects.data ?? []).map((p) => ({
-        id: p.id, title: p.title, type: "opdracht" as const, status: p.status, created_at: p.created_at,
+        id: p.id, title: norm(p.title), type: "opdracht" as const, status: p.status, created_at: p.created_at,
       })),
       ...(capacity.data ?? []).map((c) => ({
-        id: c.id, title: c.title, type: "capaciteit" as const,
+        id: c.id, title: norm(c.title), type: "capaciteit" as const,
         status: (c as { status?: string }).status ?? "actief",
         created_at: c.created_at,
       })),
