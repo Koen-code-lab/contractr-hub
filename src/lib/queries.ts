@@ -216,10 +216,24 @@ export function useConversations() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("conversations")
-        .select("*")
+        .select("*, target_company:companies!conversations_target_company_id_fkey(id, name), participant_a_profile:profiles!conversations_participant_a_fkey(id, full_name), participant_b_profile:profiles!conversations_participant_b_fkey(id, full_name)")
         .order("last_message_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const convos = data ?? [];
+      // fetch last message for each
+      const enriched = await Promise.all(
+        convos.map(async (c) => {
+          const { data: last } = await supabase
+            .from("messages")
+            .select("body, created_at, sender_id")
+            .eq("conversation_id", c.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          return { ...c, last_message: last };
+        }),
+      );
+      return enriched;
     },
   });
 }
