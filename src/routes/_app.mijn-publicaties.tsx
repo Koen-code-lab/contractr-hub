@@ -160,15 +160,19 @@ function MijnPublicaties() {
                 const isPaused = p.status === "gepauzeerd";
                 const isArchived = p.status === "gearchiveerd";
                 return (
-                  <tr key={`${p.type}-${p.id}`} className="border-t border-border hover:bg-muted/30 cursor-pointer">
+                  <tr key={`${p.type}-${p.id}`} className="border-t border-border hover:bg-muted/30">
                     <td className="px-6 py-4 font-medium">
-                      <Link
-                        to={p.type === "opdracht" ? "/opdracht/$projectId" : "/mijn-publicaties"}
-                        params={p.type === "opdracht" ? { projectId: p.id } : undefined}
-                        className="block hover:underline"
-                      >
-                        {p.title}
-                      </Link>
+                      {p.type === "opdracht" ? (
+                        <Link
+                          to="/opdracht/$projectId"
+                          params={{ projectId: p.id }}
+                          className="block hover:underline"
+                        >
+                          {p.title}
+                        </Link>
+                      ) : (
+                        <span className="block">{p.title}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-muted-foreground capitalize">{p.type}</td>
                     <td className="px-6 py-4">
