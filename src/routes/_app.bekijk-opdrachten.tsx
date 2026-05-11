@@ -133,14 +133,12 @@ function BekijkOpdrachten() {
             />
           )}
           {data?.map((o) => {
-            const company = (o as { company?: { id?: string; name?: string } }).company;
+            const company = (o as { company?: { id?: string; name?: string; logo_url?: string | null } }).company;
             return (
-              <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 transition-all">
+              <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 hover:-translate-y-0.5 transition-all">
                 <div className="flex flex-wrap items-start gap-4 justify-between">
                   <div className="flex gap-4 items-start flex-1 min-w-0">
-                    <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center shrink-0">
-                      <Briefcase className="w-6 h-6" />
-                    </div>
+                    <CompanyAvatar name={company?.name ?? o.title} logoUrl={company?.logo_url ?? null} size="lg" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <Circle className={`w-2.5 h-2.5 fill-current ${statusColor[o.status] ?? ""}`} />
