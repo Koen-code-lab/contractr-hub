@@ -53,6 +53,7 @@ function PlaatsOpdracht() {
       .from("projects")
       .insert({
         created_by: user.id,
+        company_id: myCompanyId,
         title: title.trim(),
         description: desc || null,
         category,
