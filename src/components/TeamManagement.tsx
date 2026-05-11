@@ -181,6 +181,17 @@ export function TeamManagement({ companyId }: { companyId: string }) {
               {inviting ? "Versturen…" : "Uitnodigen"}
             </button>
           </div>
+          <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">Of stuur direct via WhatsApp:</span>
+            <WhatsAppInviteButton
+              type="team_member"
+              companyId={companyId}
+              invitedByCompanyId={companyId}
+              role={inviteRole}
+              size="sm"
+              label="Nodig teamlid uit via WhatsApp"
+            />
+          </div>
         </div>
       )}
 
