@@ -273,7 +273,25 @@ export function useConversations() {
           };
         }),
       );
-      return enriched;
+      // Dedupe duplicate threads: same project + same company pair → keep most recent.
+      const myProfile = profileMap.get(user!.id);
+      const myCompanyId = (myProfile as { company_id?: string | null } | undefined)?.company_id ?? null;
+      const seen = new Map<string, typeof enriched[number]>();
+      for (const c of enriched) {
+        const otherCompanyId =
+          c.target_company_id ??
+          (c.other_profile as { company_id?: string | null } | null)?.company_id ??
+          null;
+        const pair = [myCompanyId, otherCompanyId].filter(Boolean).sort().join("~");
+        const key = `${(c as { project_id?: string | null }).project_id ?? ""}|${pair || c.id}`;
+        const prev = seen.get(key);
+        const cTs = new Date((c.last_message?.created_at as string | undefined) ?? c.last_message_at).getTime();
+        const pTs = prev ? new Date((prev.last_message?.created_at as string | undefined) ?? prev.last_message_at).getTime() : -Infinity;
+        if (!prev || cTs > pTs) seen.set(key, c);
+      }
+      return Array.from(seen.values()).sort(
+        (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
+      );
     },
   });
 }

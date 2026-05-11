@@ -30,19 +30,55 @@ export async function getOrCreateCompanyConversation(
   companyId: string,
   projectId?: string | null,
 ): Promise<string> {
-  // Existing conversation targeted at this company by me (and same project if provided)
-  let findQ = supabase
-    .from("conversations")
-    .select("id")
-    .eq("participant_a", myId)
-    .eq("target_company_id", companyId);
-  if (projectId) findQ = findQ.eq("project_id", projectId);
-  else findQ = findQ.is("project_id", null);
-  const { data: existing, error: findErr } = await findQ.limit(1).maybeSingle();
-  if (findErr) throw findErr;
-  if (existing) return existing.id;
+  const myCompanyId = await getMyCompanyId(myId);
 
-  // Try to attach a representative for this company (excluding me)
+  // Build candidate set: any conversation matching this project (or null) whose
+  // target_company_id is either side of the (myCompany, targetCompany) pair.
+  const targetIds = [companyId, ...(myCompanyId ? [myCompanyId] : [])];
+  let candQ = supabase
+    .from("conversations")
+    .select("id, participant_a, participant_b, target_company_id, project_id")
+    .in("target_company_id", targetIds);
+  if (projectId) candQ = candQ.eq("project_id", projectId);
+  else candQ = candQ.is("project_id", null);
+  const { data: candidates, error: candErr } = await candQ;
+  if (candErr) throw candErr;
+
+  if (candidates && candidates.length) {
+    // Resolve company_id for each participant to detect the company pair
+    const participantIds = Array.from(
+      new Set(
+        candidates
+          .flatMap((c) => [c.participant_a, c.participant_b])
+          .filter(Boolean) as string[],
+      ),
+    );
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, company_id")
+      .in("id", participantIds);
+    const profCompany = new Map((profs ?? []).map((p) => [p.id, p.company_id]));
+
+    // 1) Strict company-pair match (preferred): both sides resolve to the pair
+    const pairMatch = candidates.find((c) => {
+      const aC = profCompany.get(c.participant_a) ?? null;
+      const bC = c.participant_b ? profCompany.get(c.participant_b) ?? null : null;
+      const sideCompanies = new Set([aC, bC, c.target_company_id].filter(Boolean) as string[]);
+      if (!myCompanyId) return false;
+      return sideCompanies.has(myCompanyId) && sideCompanies.has(companyId);
+    });
+    if (pairMatch) return pairMatch.id;
+
+    // 2) Fallback: I am a participant and target_company_id matches (legacy rows / no company yet)
+    const meMatch = candidates.find(
+      (c) =>
+        c.target_company_id === companyId &&
+        (c.participant_a === myId || c.participant_b === myId),
+    );
+    if (meMatch) return meMatch.id;
+  }
+
+  // Try to attach a representative for the target company (excluding me)
   const { data: rep } = await supabase
     .from("profiles")
     .select("id")
