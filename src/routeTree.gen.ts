@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AppZoekCapaciteitRouteImport } from './routes/_app.zoek-capaciteit'
 import { Route as AppPlaatsOpdrachtRouteImport } from './routes/_app.plaats-opdracht'
 import { Route as AppMijnPublicatiesRouteImport } from './routes/_app.mijn-publicaties'
@@ -39,6 +40,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppZoekCapaciteitRoute = AppZoekCapaciteitRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/_app/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/_app/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/_app/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/_app/opdracht_/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/mijn-publicaties'
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
+    | '/invite/$token'
     | '/bedrijven/$companyId'
     | '/opdracht/$projectId'
     | '/opdracht/$projectId/edit'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/mijn-publicaties'
     | '/plaats-opdracht'
     | '/zoek-capaciteit'
+    | '/invite/$token'
     | '/bedrijven/$companyId'
     | '/opdracht/$projectId'
     | '/opdracht/$projectId/edit'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/_app/mijn-publicaties'
     | '/_app/plaats-opdracht'
     | '/_app/zoek-capaciteit'
+    | '/invite/$token'
     | '/_app/bedrijven/$companyId'
     | '/_app/opdracht/$projectId'
     | '/_app/opdracht_/$projectId/edit'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/zoek-capaciteit': {
@@ -397,6 +417,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

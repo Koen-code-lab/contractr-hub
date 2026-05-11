@@ -1,15 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
+import { z } from "zod";
 import { Construction, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: z.object({ redirect: z.string().optional() }),
   component: Login,
 });
 
 function Login() {
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
+  const target = redirect && redirect.startsWith("/") ? redirect : "/dashboard";
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,8 +23,8 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user) navigate({ to: "/dashboard", replace: true });
-  }, [user, navigate]);
+    if (user) navigate({ to: target, replace: true });
+  }, [user, navigate, target]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,7 +35,7 @@ function Login() {
       if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) setError(error.message);
-        else navigate({ to: "/dashboard", replace: true });
+        else navigate({ to: target, replace: true });
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) setError(error.message);
