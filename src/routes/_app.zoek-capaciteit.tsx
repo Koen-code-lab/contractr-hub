@@ -147,9 +147,13 @@ function ZoekCapaciteit() {
                   </div>
                   <h3 className="font-semibold mt-4">{p.title}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-2">{company?.name ?? p.description ?? ""}</p>
-                  <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
                     {p.region && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {p.region}</span>}
                     {p.specialisation && <span className="px-2 py-0.5 rounded-full bg-muted">{p.specialisation}</span>}
+                    {(() => {
+                      const label = formatAttachmentSummary(attachmentSummaries?.get(p.id));
+                      return label ? <span className="flex items-center gap-1"><Paperclip className="w-3 h-3" /> {label}</span> : null;
+                    })()}
                   </div>
                   <div className="border-t border-border mt-4 pt-4 flex items-center justify-between">
                     <div className="text-sm font-bold">{p.capacity_value ? `€ ${p.capacity_value}/u` : "Op aanvraag"}</div>
