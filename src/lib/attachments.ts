@@ -4,12 +4,13 @@ export type Attachment = {
   id: string;
   project_id: string | null;
   capacity_post_id: string | null;
-  uploaded_by: string;
+  uploaded_by: string | null;
   file_name: string;
   file_type: string | null;
   file_url: string;
   storage_path: string;
   created_at: string;
+  source?: "post_attachments" | "project_files";
 };
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -29,6 +30,49 @@ export function isImageAttachment(a: Pick<Attachment, "file_type" | "file_name">
   return ["jpg", "jpeg", "png", "webp", "gif"].includes(ext);
 }
 
+function storagePathFromPublicUrl(url: string) {
+  const marker = "/storage/v1/object/public/project-files/";
+  const idx = url.indexOf(marker);
+  if (idx >= 0) return decodeURIComponent(url.slice(idx + marker.length));
+  return url;
+}
+
+function mergeProjectAttachments(postRows: Attachment[], legacyRows: Array<{
+  id: string;
+  project_id: string;
+  file_name: string;
+  file_type: string | null;
+  file_url: string;
+  uploaded_at: string;
+}>) {
+  const seen = new Set<string>();
+  const merged: Attachment[] = [];
+  for (const row of postRows) {
+    const key = row.storage_path || row.file_url;
+    seen.add(key);
+    merged.push({ ...row, source: "post_attachments" });
+  }
+  for (const row of legacyRows) {
+    const storagePath = storagePathFromPublicUrl(row.file_url);
+    const key = storagePath || row.file_url;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push({
+      id: row.id,
+      project_id: row.project_id,
+      capacity_post_id: null,
+      uploaded_by: null,
+      file_name: row.file_name,
+      file_type: row.file_type,
+      file_url: row.file_url,
+      storage_path: storagePath,
+      created_at: row.uploaded_at,
+      source: "project_files",
+    });
+  }
+  return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
 type UploadTarget =
   | { projectId: string; capacityPostId?: undefined }
   | { capacityPostId: string; projectId?: undefined };
@@ -46,13 +90,26 @@ export async function uploadAttachments(
     const parentId = target.projectId ?? target.capacityPostId!;
     const folder = target.projectId ? "projects" : "capacity";
     const path = `${userId}/${folder}/${parentId}/${Date.now()}-${safe}`;
+    console.log("[attachments] upload start", {
+      fileName: file.name,
+      resolvedProjectId: target.projectId ?? null,
+      resolvedCapacityPostId: target.capacityPostId ?? null,
+      storagePath: path,
+    });
     const up = await supabase.storage.from("project-files").upload(path, file, {
       contentType: file.type || undefined,
       upsert: false,
     });
-    if (up.error) { failed.push(file.name); continue; }
+    if (up.error) { console.error("[attachments] storage upload failed", up.error); failed.push(file.name); continue; }
     const { data: pub } = supabase.storage.from("project-files").getPublicUrl(up.data.path);
-    const { error: insErr } = await supabase.from("post_attachments" as never).insert({
+    console.log("[attachments] uploaded file URL", {
+      fileName: file.name,
+      fileUrl: pub.publicUrl,
+      storagePath: up.data.path,
+      resolvedProjectId: target.projectId ?? null,
+      resolvedCapacityPostId: target.capacityPostId ?? null,
+    });
+    const row = {
       project_id: target.projectId ?? null,
       capacity_post_id: target.capacityPostId ?? null,
       uploaded_by: userId,
@@ -60,10 +117,19 @@ export async function uploadAttachments(
       file_type: file.type || null,
       file_url: pub.publicUrl,
       storage_path: up.data.path,
-    } as never);
+    };
+    console.log("[attachments] inserting attachment row", row);
+    const { data: inserted, error: insErr } = await supabase
+      .from("post_attachments")
+      .insert(row)
+      .select("*")
+      .single();
     if (insErr) {
+      console.error("[attachments] metadata insert failed", insErr);
       await supabase.storage.from("project-files").remove([up.data.path]);
       failed.push(file.name);
+    } else {
+      console.log("[attachments] inserted attachment row", inserted);
     }
   }
   return { failed };
