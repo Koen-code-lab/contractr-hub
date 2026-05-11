@@ -154,7 +154,7 @@ function Berichten() {
                   </div>
                 );
               })()}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
                 {messages?.length === 0 && (
                   <div className="text-sm text-muted-foreground text-center">Nog geen berichten in dit gesprek.</div>
                 )}
