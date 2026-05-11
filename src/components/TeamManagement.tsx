@@ -215,16 +215,15 @@ export function TeamManagement({ companyId }: { companyId: string }) {
                     {inv.role} · {new Date(inv.created_at).toLocaleDateString("nl-BE")}
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    const link = inviteLink(inv.token);
-                    openWhatsApp(buildWhatsAppMessage("team_member", link));
-                  }}
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(buildWhatsAppMessage("team_member", inviteLink(inv.token)))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#25D366]"
                   title="Opnieuw via WhatsApp"
                 >
                   <MessageCircle className="w-4 h-4" />
-                </button>
+                </a>
                 <button
                   onClick={() => copyInviteLink(inv.token)}
                   className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
