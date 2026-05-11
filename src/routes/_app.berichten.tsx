@@ -84,8 +84,8 @@ function Berichten() {
     <>
       <PageHeader title="Berichten" subtitle="Communiceer rechtstreeks met je netwerk." />
 
-      <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden grid md:grid-cols-[320px_1fr] h-[640px]">
-        <div className="border-r border-border flex flex-col">
+      <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden grid md:grid-cols-[320px_1fr] h-[calc(100dvh-12rem)] min-h-[480px]">
+        <div className="border-r border-border flex flex-col min-h-0">
           <div className="p-4 border-b border-border">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -131,7 +131,7 @@ function Berichten() {
           </div>
         </div>
 
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 min-h-0 h-full">
           {!currentId ? (
             <div className="flex-1 flex items-center justify-center p-10">
               <EmptyState title="Selecteer een gesprek" description="Begin een gesprek vanuit een profiel of bedrijf." />
@@ -144,7 +144,7 @@ function Berichten() {
                 const subject = (active as { subject?: string | null } | undefined)?.subject ?? null;
                 const logo = (active as { display_logo?: string | null } | undefined)?.display_logo ?? null;
                 return (
-                  <div className="p-4 border-b border-border flex items-center gap-3">
+                  <div className="p-4 border-b border-border flex items-center gap-3 shrink-0 bg-card">
                     <CompanyAvatar name={title} logoUrl={logo} size="sm" shape="circle" />
                     <div>
                       <div className="font-semibold text-sm">{title}</div>
@@ -154,7 +154,7 @@ function Berichten() {
                   </div>
                 );
               })()}
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
+              <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-6 pb-8 space-y-4 bg-muted/20 overscroll-contain">
                 {messages?.length === 0 && (
                   <div className="text-sm text-muted-foreground text-center">Nog geen berichten in dit gesprek.</div>
                 )}
@@ -174,7 +174,8 @@ function Berichten() {
               </div>
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
-                className="p-4 border-t border-border flex gap-2 items-center"
+                className="p-4 border-t border-border flex gap-2 items-center shrink-0 bg-card"
+                style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
               >
                 <button type="button" className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center"><Paperclip className="w-4 h-4" /></button>
                 <input
