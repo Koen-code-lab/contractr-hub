@@ -208,6 +208,11 @@ function ProfileEditDialog({
   onSaved: () => void;
 }) {
   const { user } = useAuth();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<"logo" | "avatar" | null>(null);
   const [form, setForm] = useState({
     full_name: "",
     company_name: "",
@@ -223,6 +228,8 @@ function ProfileEditDialog({
 
   useEffect(() => {
     if (!open) return;
+    setLogoUrl((company?.logo_url as string | null) ?? null);
+    setAvatarUrl((profile?.avatar_url as string | null) ?? null);
     setForm({
       full_name: profile?.full_name ?? "",
       company_name: company?.name ?? "",
@@ -237,6 +244,35 @@ function ProfileEditDialog({
         .map((p) => `${p.titel} | ${p.waarde} | ${p.jaar}`).join("\n"),
     });
   }, [open, profile, company]);
+
+  const handleImageUpload = async (file: File, kind: "logo" | "avatar") => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Alleen afbeeldingen toegestaan");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Afbeelding te groot (max 5MB)");
+      return;
+    }
+    setUploading(kind);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
+      const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      if (kind === "logo") setLogoUrl(pub.publicUrl);
+      else setAvatarUrl(pub.publicUrl);
+      toast.success(kind === "logo" ? "Logo geüpload" : "Avatar geüpload");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Upload mislukt");
+    } finally {
+      setUploading(null);
+    }
+  };
 
   const save = useMutation({
     mutationFn: async () => {
