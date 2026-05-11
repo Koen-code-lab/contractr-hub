@@ -16,6 +16,7 @@ import {
 } from "@/lib/connections";
 import { toast } from "sonner";
 import { useCompanyGate } from "@/lib/companyGate";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/mijn-netwerk")({
   component: MijnNetwerk,
