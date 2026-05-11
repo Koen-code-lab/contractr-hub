@@ -15,6 +15,7 @@ import {
   type ConnectionRow,
 } from "@/lib/connections";
 import { toast } from "sonner";
+import { useCompanyGate } from "@/lib/companyGate";
 
 export const Route = createFileRoute("/_app/mijn-netwerk")({
   component: MijnNetwerk,
@@ -30,6 +31,7 @@ function MijnNetwerk() {
   const [tab, setTab] = useState<"verbonden" | "verzoeken" | "alle">("alle");
   const [myCompanyId, setMyCompanyId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { requireCompany } = useCompanyGate();
 
   useEffect(() => {
     if (!user) return;
@@ -84,6 +86,7 @@ function MijnNetwerk() {
 
   const handleConnect = async (companyId: string) => {
     if (!user) return;
+    if (!requireCompany()) return;
     setBusyId(companyId);
     try {
       await requestCompanyConnection(user.id, companyId);
@@ -95,6 +98,7 @@ function MijnNetwerk() {
 
   const handleMessage = async (companyId: string) => {
     if (!user) return;
+    if (!requireCompany()) return;
     setBusyId(companyId);
     try {
       await getOrCreateCompanyConversation(user.id, companyId);
