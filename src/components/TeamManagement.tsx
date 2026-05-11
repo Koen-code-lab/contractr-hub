@@ -12,7 +12,7 @@ import {
 } from "@/lib/team";
 import { LoadingState } from "@/components/States";
 import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
-import { buildWhatsAppMessage, inviteLink, openWhatsApp } from "@/lib/whatsappInvite";
+import { buildWhatsAppMessage, inviteLink } from "@/lib/whatsappInvite";
 
 export function TeamManagement({ companyId }: { companyId: string }) {
   const { user } = useAuth();
