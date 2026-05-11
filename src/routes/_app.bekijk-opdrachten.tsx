@@ -129,7 +129,8 @@ function BekijkOpdrachten() {
               description="Er zijn momenteel geen opdrachten die aan je filters voldoen."
             />
           )}
-          {data?.map((o) => {
+          <ProjectAttachmentsContext projects={data ?? []}>
+          {(summaries) => <>{data?.map((o) => {
             const company = (o as { company?: { id?: string; name?: string } }).company;
             return (
               <div key={o.id} className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-elevated hover:border-foreground/20 transition-all">
