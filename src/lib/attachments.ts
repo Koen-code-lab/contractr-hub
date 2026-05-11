@@ -148,7 +148,23 @@ export async function fetchAttachmentsForProject(projectId: string): Promise<Att
     .eq("project_id", projectId)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as unknown as Attachment[];
+  const { data: legacy, error: legacyError } = await supabase
+    .from("project_files")
+    .select("id, project_id, file_name, file_type, file_url, uploaded_at")
+    .eq("project_id", projectId)
+    .order("uploaded_at", { ascending: true });
+  if (legacyError) throw legacyError;
+  const merged = mergeProjectAttachments(
+    (data ?? []) as unknown as Attachment[],
+    (legacy ?? []) as Array<{ id: string; project_id: string; file_name: string; file_type: string | null; file_url: string; uploaded_at: string }>,
+  );
+  console.log("[attachments] fetched project attachments", {
+    projectId,
+    postAttachmentsCount: (data ?? []).length,
+    legacyProjectFilesCount: legacy?.length ?? 0,
+    totalCount: merged.length,
+  });
+  return merged;
 }
 
 export async function fetchAttachmentsForCapacity(capacityPostId: string): Promise<Attachment[]> {
@@ -158,6 +174,10 @@ export async function fetchAttachmentsForCapacity(capacityPostId: string): Promi
     .eq("capacity_post_id", capacityPostId)
     .order("created_at", { ascending: true });
   if (error) throw error;
+  console.log("[attachments] fetched capacity attachments", {
+    capacityPostId,
+    totalCount: (data ?? []).length,
+  });
   return (data ?? []) as unknown as Attachment[];
 }
 
