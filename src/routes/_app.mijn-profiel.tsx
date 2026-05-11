@@ -461,3 +461,41 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+function ImageUploadField({
+  label, value, busy, onPick, onClear, shape,
+}: {
+  label: string;
+  value: string | null;
+  busy: boolean;
+  onPick: () => void;
+  onClear: () => void;
+  shape: "rounded" | "circle";
+}) {
+  const radius = shape === "circle" ? "rounded-full" : "rounded-2xl";
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-3">
+        <div className={`w-20 h-20 ${radius} overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0`}>
+          {value ? (
+            <img src={value} alt={label} className="w-full h-full object-contain bg-card" loading="lazy" />
+          ) : (
+            <Upload className="w-5 h-5 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={onPick} disabled={busy}>
+            {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
+            {value ? "Vervangen" : "Upload"}
+          </Button>
+          {value && (
+            <Button type="button" variant="ghost" size="sm" onClick={onClear} disabled={busy}>
+              Verwijder
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
