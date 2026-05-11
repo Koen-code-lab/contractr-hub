@@ -240,7 +240,8 @@ export function TeamManagement({ companyId }: { companyId: string }) {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
