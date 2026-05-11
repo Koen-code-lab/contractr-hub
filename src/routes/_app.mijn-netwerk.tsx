@@ -115,7 +115,7 @@ function MijnNetwerk() {
         title="Mijn netwerk"
         subtitle="Bouw aan een sterk professioneel netwerk in de Belgische bouwsector."
         actions={
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
             {([
               { v: "alle", l: "Alle bedrijven" },
               { v: "verbonden", l: `Verbonden (${connectedCompanyIds.size})` },
@@ -124,6 +124,7 @@ function MijnNetwerk() {
               <button key={t.v} onClick={() => setTab(t.v)}
                 className={`px-4 py-2 rounded-full text-sm font-medium ${tab === t.v ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{t.l}</button>
             ))}
+            <WhatsAppInviteButton type="company_invite" label="Nodig bedrijf uit" invitedByCompanyId={myCompanyId} />
           </div>
         }
       />
