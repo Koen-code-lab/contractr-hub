@@ -342,6 +342,8 @@ function OpdrachtDetail() {
         </section>
       )}
 
+      <AttachmentsViewer attachments={attachments} />
+
       {isOwner && (
         <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
           <h3 className="font-display font-semibold text-lg mb-4">Geïnteresseerde bedrijven</h3>
