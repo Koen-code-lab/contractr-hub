@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingState, ErrorState } from "@/components/States";
+import { TeamManagement } from "@/components/TeamManagement";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/instellingen")({
@@ -261,6 +262,7 @@ function BedrijfSection() {
   };
 
   return (
+    <div className="space-y-6">
     <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
       <h3 className="font-display font-semibold text-lg mb-1">Bedrijfsgegevens</h3>
       {!companyId && (
@@ -295,6 +297,8 @@ function BedrijfSection() {
         </button>
       </div>
     </section>
+    {companyId && <TeamManagement companyId={companyId} />}
+    </div>
   );
 }
 
