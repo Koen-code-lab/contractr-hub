@@ -261,6 +261,7 @@ function ProfileEditDialog({
 
       // 2. patch profile — never upsert with a partial payload, that resets
       // untouched columns (bio, phone, specialisations, …) to their defaults.
+      const profilesTable = supabase.from("profiles") as any;
       const profilePatch: Record<string, unknown> = {
         full_name: form.full_name || null,
         specialisations: specs,
