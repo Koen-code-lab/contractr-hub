@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Construction, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   validateSearch: z.object({ redirect: z.string().optional() }),
