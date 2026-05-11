@@ -52,6 +52,7 @@ function Berichten() {
             {conversations?.map((c) => {
               const isActive = c.id === currentId;
               const title = (c as { display_title?: string }).display_title ?? "Gesprek";
+              const subject = (c as { subject?: string | null }).subject ?? null;
               const last = (c as { last_message?: { body: string; created_at: string } | null }).last_message;
               const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
               return (
@@ -71,6 +72,7 @@ function Berichten() {
                           {new Date(last?.created_at ?? c.last_message_at).toLocaleDateString("nl-BE", { day: "2-digit", month: "short" })}
                         </div>
                       </div>
+                      {subject && <div className="text-[11px] text-muted-foreground truncate italic">{subject}</div>}
                       <div className="text-xs text-muted-foreground truncate mt-0.5">
                         {last?.body ?? "Nog geen berichten"}
                       </div>
