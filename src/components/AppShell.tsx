@@ -15,6 +15,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useRealtimeMessages } from "@/lib/useRealtimeMessages";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
