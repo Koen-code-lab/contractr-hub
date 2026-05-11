@@ -181,6 +181,10 @@ function BekijkOpdrachten() {
                   {o.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {o.location}</span>}
                   {o.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline {new Date(o.deadline).toLocaleDateString("nl-BE")}</span>}
                   {o.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Start {new Date(o.start_date).toLocaleDateString("nl-BE")}</span>}
+                  {(() => {
+                    const label = formatAttachmentSummary(attachmentSummaries?.get(o.id));
+                    return label ? <span className="flex items-center gap-1.5"><Paperclip className="w-4 h-4" /> {label}</span> : null;
+                  })()}
                 </div>
               </div>
             );
