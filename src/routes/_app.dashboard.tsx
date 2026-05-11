@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { ArrowUpRight, Briefcase, HardHat, TrendingUp, Users, Plus, Eye, MessageSquare, Sparkles, MapPin } from "lucide-react";
 import { useMyProjects, useMyCapacityPosts, useProjects } from "@/lib/queries";
+import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -50,6 +51,7 @@ function Dashboard() {
             <Link to="/bied-capaciteit-aan" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-medium hover:opacity-90">
               <HardHat className="w-4 h-4" /> Bied capaciteit aan
             </Link>
+            <WhatsAppInviteButton type="company_invite" label="Nodig bedrijf uit" />
           </>
         }
       />

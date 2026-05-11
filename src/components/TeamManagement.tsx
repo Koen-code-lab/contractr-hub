@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2, Mail, Copy, Shield, UserPlus } from "lucide-react";
+import { Trash2, Mail, Copy, Shield, UserPlus, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
@@ -11,6 +11,8 @@ import {
   type CompanyRole,
 } from "@/lib/team";
 import { LoadingState } from "@/components/States";
+import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
+import { buildWhatsAppMessage, inviteLink, openWhatsApp } from "@/lib/whatsappInvite";
 
 export function TeamManagement({ companyId }: { companyId: string }) {
   const { user } = useAuth();
@@ -179,6 +181,17 @@ export function TeamManagement({ companyId }: { companyId: string }) {
               {inviting ? "Versturen…" : "Uitnodigen"}
             </button>
           </div>
+          <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">Of stuur direct via WhatsApp:</span>
+            <WhatsAppInviteButton
+              type="team_member"
+              companyId={companyId}
+              invitedByCompanyId={companyId}
+              role={inviteRole}
+              size="sm"
+              label="Nodig teamlid uit via WhatsApp"
+            />
+          </div>
         </div>
       )}
 
@@ -187,13 +200,31 @@ export function TeamManagement({ companyId }: { companyId: string }) {
         <div>
           <h4 className="text-sm font-medium mb-2">Openstaande uitnodigingen</h4>
           <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
-            {invitations.map((inv) => (
+            {invitations.map((inv) => {
+              const channel = (inv as { channel?: string | null }).channel;
+              return (
               <div key={inv.id} className="flex items-center gap-3 p-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
+                {channel === "whatsapp" ? (
+                  <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                ) : (
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">{inv.email}</div>
-                  <div className="text-xs text-muted-foreground capitalize">{inv.role}</div>
+                  <div className="text-sm truncate">{inv.email ?? "WhatsApp uitnodiging"}</div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {inv.role} · {new Date(inv.created_at).toLocaleDateString("nl-BE")}
+                  </div>
                 </div>
+                <button
+                  onClick={() => {
+                    const link = inviteLink(inv.token);
+                    openWhatsApp(buildWhatsAppMessage("team_member", link));
+                  }}
+                  className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#25D366]"
+                  title="Opnieuw via WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => copyInviteLink(inv.token)}
                   className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
@@ -209,7 +240,8 @@ export function TeamManagement({ companyId }: { companyId: string }) {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

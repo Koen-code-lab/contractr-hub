@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { useCompanyGate } from "@/lib/companyGate";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
 
 export const Route = createFileRoute("/_app/mijn-netwerk")({
   component: MijnNetwerk,
@@ -114,7 +115,7 @@ function MijnNetwerk() {
         title="Mijn netwerk"
         subtitle="Bouw aan een sterk professioneel netwerk in de Belgische bouwsector."
         actions={
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
             {([
               { v: "alle", l: "Alle bedrijven" },
               { v: "verbonden", l: `Verbonden (${connectedCompanyIds.size})` },
@@ -123,6 +124,7 @@ function MijnNetwerk() {
               <button key={t.v} onClick={() => setTab(t.v)}
                 className={`px-4 py-2 rounded-full text-sm font-medium ${tab === t.v ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{t.l}</button>
             ))}
+            <WhatsAppInviteButton type="company_invite" label="Nodig bedrijf uit" invitedByCompanyId={myCompanyId} />
           </div>
         }
       />
@@ -152,7 +154,10 @@ function MijnNetwerk() {
           {companies.isLoading && <LoadingState />}
           {companies.error && <ErrorState error={companies.error} />}
           {!companies.isLoading && !companies.error && visible.length === 0 && (
-            <EmptyState title={tab === "verbonden" ? "Nog geen verbindingen" : "Nog geen bedrijven"} description="Bedrijven die zich aansluiten verschijnen hier." />
+            <div className="flex flex-col items-center gap-3">
+              <EmptyState title={tab === "verbonden" ? "Nog geen verbindingen" : "Nog geen bedrijven"} description="Nodig zelf bedrijven uit via WhatsApp om je netwerk te starten." />
+              <WhatsAppInviteButton type="company_invite" label="Nodig bedrijf uit via WhatsApp" invitedByCompanyId={myCompanyId} />
+            </div>
           )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
