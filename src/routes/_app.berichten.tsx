@@ -9,14 +9,16 @@ import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_app/berichten")({
+  validateSearch: (s: Record<string, unknown>) => ({ c: typeof s.c === "string" ? s.c : undefined }),
   component: Berichten,
 });
 
 function Berichten() {
   const { user } = useAuth();
+  const { c: deepLinkId } = Route.useSearch();
   const { data: conversations, isLoading, error } = useConversations();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const currentId = activeId ?? conversations?.[0]?.id ?? null;
+  const currentId = activeId ?? deepLinkId ?? conversations?.[0]?.id ?? null;
   const { data: messages } = useMessages(currentId);
   const [draft, setDraft] = useState("");
   const qc = useQueryClient();
