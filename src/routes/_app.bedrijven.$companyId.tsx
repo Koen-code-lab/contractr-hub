@@ -10,6 +10,7 @@ import {
   useConnections,
 } from "@/lib/queries";
 import { LoadingState, ErrorState, EmptyState } from "@/components/States";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { useAuth } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import {
