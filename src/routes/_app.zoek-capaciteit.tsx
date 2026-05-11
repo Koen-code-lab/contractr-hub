@@ -17,6 +17,8 @@ function ZoekCapaciteit() {
   const [draft, setDraft] = useState<CapacityFilters>({});
   const [active, setActive] = useState<CapacityFilters>({});
   const { data, isLoading, error } = useCapacityPosts(active);
+  const capacityIds = (data ?? []).map((p) => p.id);
+  const { data: attachmentSummaries } = useCapacityAttachmentSummaries(capacityIds);
 
   const toggleSpec = (s: string) =>
     setDraft((d) => {
