@@ -131,7 +131,7 @@ function Berichten() {
           </div>
         </div>
 
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 min-h-0 h-full">
           {!currentId ? (
             <div className="flex-1 flex items-center justify-center p-10">
               <EmptyState title="Selecteer een gesprek" description="Begin een gesprek vanuit een profiel of bedrijf." />
