@@ -15,6 +15,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useRealtimeMessages } from "@/lib/useRealtimeMessages";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,6 +35,7 @@ export function AppShell() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const fullName = (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
+  useRealtimeMessages();
   const initials = (fullName || user?.email || "U")
     .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("") || "U";
   const handleLogout = async () => {

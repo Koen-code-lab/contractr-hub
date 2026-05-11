@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Send, Search, Paperclip } from "lucide-react";
 import { useConversations, useMessages } from "@/lib/queries";
@@ -14,6 +14,14 @@ export const Route = createFileRoute("/_app/berichten")({
   component: Berichten,
 });
 
+type OptimisticMsg = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+};
+
 function Berichten() {
   const { user } = useAuth();
   const { c: deepLinkId } = Route.useSearch();
@@ -23,13 +31,53 @@ function Berichten() {
   const { data: messages } = useMessages(currentId);
   const [draft, setDraft] = useState("");
   const qc = useQueryClient();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Track which conversation is active so realtime can suppress its toast.
+  useEffect(() => {
+    qc.setQueryData(["active-conversation"], currentId);
+    return () => {
+      qc.setQueryData(["active-conversation"], null);
+    };
+  }, [currentId, qc]);
+
+  // Auto-scroll on new messages.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages?.length, currentId]);
 
   const send = async () => {
     if (!draft.trim() || !currentId || !user) return;
     const body = draft.trim();
     setDraft("");
-    await supabase.from("messages").insert({ conversation_id: currentId, sender_id: user.id, body });
-    qc.invalidateQueries({ queryKey: ["messages", currentId] });
+    const tempId = `tmp-${crypto.randomUUID()}`;
+    const optimistic: OptimisticMsg = {
+      id: tempId,
+      conversation_id: currentId,
+      sender_id: user.id,
+      body,
+      created_at: new Date().toISOString(),
+    };
+    qc.setQueryData<OptimisticMsg[]>(["messages", currentId], (prev) => [...(prev ?? []), optimistic]);
+    const { data, error: sendErr } = await supabase
+      .from("messages")
+      .insert({ conversation_id: currentId, sender_id: user.id, body })
+      .select("*")
+      .maybeSingle();
+    if (sendErr) {
+      // Roll back optimistic
+      qc.setQueryData<OptimisticMsg[]>(["messages", currentId], (prev) =>
+        (prev ?? []).filter((m) => m.id !== tempId),
+      );
+      return;
+    }
+    // Replace temp with real (dedupe in case realtime already added it).
+    qc.setQueryData<OptimisticMsg[]>(["messages", currentId], (prev) => {
+      const next = (prev ?? []).filter((m) => m.id !== tempId);
+      if (data && !next.some((m) => m.id === data.id)) next.push(data as OptimisticMsg);
+      return next;
+    });
   };
 
   return (
@@ -106,7 +154,7 @@ function Berichten() {
                   </div>
                 );
               })()}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/20">
                 {messages?.length === 0 && (
                   <div className="text-sm text-muted-foreground text-center">Nog geen berichten in dit gesprek.</div>
                 )}
