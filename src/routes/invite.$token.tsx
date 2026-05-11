@@ -24,20 +24,10 @@ function AcceptInvite() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("company_invitations")
-        .select("*, company:companies(id, name, logo_url), inviter:companies!company_invitations_invited_by_company_id_fkey(id, name)")
-        // fallback select without optional FK alias
+        .select("*, company:companies(id, name, logo_url)")
         .eq("token", token)
         .maybeSingle();
-      if (error) {
-        // Retry without inviter alias in case FK is not defined
-        const { data: d2, error: e2 } = await supabase
-          .from("company_invitations")
-          .select("*, company:companies(id, name, logo_url)")
-          .eq("token", token)
-          .maybeSingle();
-        if (e2) throw e2;
-        return d2;
-      }
+      if (error) throw error;
       return data;
     },
   });
