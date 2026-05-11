@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2, Mail, Copy, Shield, UserPlus } from "lucide-react";
+import { Trash2, Mail, Copy, Shield, UserPlus, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
@@ -11,6 +11,8 @@ import {
   type CompanyRole,
 } from "@/lib/team";
 import { LoadingState } from "@/components/States";
+import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
+import { buildWhatsAppMessage, inviteLink, openWhatsApp } from "@/lib/whatsappInvite";
 
 export function TeamManagement({ companyId }: { companyId: string }) {
   const { user } = useAuth();
