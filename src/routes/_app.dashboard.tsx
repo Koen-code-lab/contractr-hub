@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { RegionActivity } from "@/components/RegionActivity";
 import { ArrowUpRight, Briefcase, HardHat, TrendingUp, Users, Plus, Eye, MessageSquare, Sparkles, MapPin } from "lucide-react";
 import { useMyProjects, useMyCapacityPosts, useProjects } from "@/lib/queries";
+import { WhatsAppInviteButton } from "@/components/WhatsAppInviteButton";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
