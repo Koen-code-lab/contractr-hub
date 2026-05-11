@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 import { useCompanyGate } from "@/lib/companyGate";
+import { uploadAttachments, validateAttachment } from "@/lib/attachments";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
