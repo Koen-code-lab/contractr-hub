@@ -72,22 +72,35 @@ function MijnProfiel() {
       <PageHeader title="Mijn profiel" subtitle="Zo zien anderen jou op CONTRACTR." />
 
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden mb-6">
-        <div className="h-44 bg-gradient-to-br from-foreground via-foreground to-foreground/80 relative">
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 70% 30%, oklch(0.83 0.16 90 / 0.4), transparent 50%)" }} />
+        <div className="h-56 bg-gradient-to-br from-foreground via-foreground to-foreground/85 relative">
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 70% 30%, oklch(0.83 0.16 90 / 0.35), transparent 55%)" }} />
+          {/* dark scrim to guarantee text contrast over any background */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         </div>
-        <div className="px-8 pb-8 -mt-16 relative">
+        <div className="px-8 pb-8 -mt-20 relative">
           <div className="flex flex-wrap items-end gap-6 justify-between">
             <div className="flex items-end gap-5">
-              <div className="w-32 h-32 rounded-3xl bg-card border-4 border-card shadow-elevated flex items-center justify-center text-3xl font-display font-bold bg-gradient-to-br from-accent to-accent/70">
-                {initials}
+              <div className="w-32 h-32 rounded-3xl bg-card border-4 border-card shadow-elevated overflow-hidden flex items-center justify-center">
+                {company?.logo_url ? (
+                  <img
+                    src={company.logo_url as string}
+                    alt={`${companyName} logo`}
+                    loading="lazy"
+                    className="w-full h-full object-contain bg-card"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-3xl font-display font-bold bg-gradient-to-br from-accent to-accent/70 text-accent-foreground">
+                    {initials}
+                  </div>
+                )}
               </div>
-              <div className="pb-2" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>
+              <div className="pb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.55)]">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-display font-bold text-white">{profile?.full_name ?? "Mijn naam"}</h2>
                   <CheckCircle2 className="w-5 h-5 text-accent fill-accent/30" />
                 </div>
-                <div className="text-white/80 mt-1">{companyType} · {companyName}</div>
-                <div className="text-sm text-white/70 mt-2 flex flex-wrap gap-4">
+                <div className="text-white/90 mt-1 font-medium">{companyType} · {companyName}</div>
+                <div className="text-sm text-white/85 mt-2 flex flex-wrap gap-4">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {companyCity}</span>
                   {employees != null && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {employees} medewerkers</span>}
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Sinds {profile?.created_at ? new Date(profile.created_at).getFullYear() : "—"}</span>
