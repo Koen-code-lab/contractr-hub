@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { MapPin, HardHat, Search, Calendar, Paperclip } from "lucide-react";
+import { MapPin, Search, Calendar, Paperclip } from "lucide-react";
 import { useCapacityPosts, useCapacityAttachmentSummaries, type CapacityFilters } from "@/lib/queries";
 import { formatAttachmentSummary } from "@/lib/attachments";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
   component: ZoekCapaciteit,
