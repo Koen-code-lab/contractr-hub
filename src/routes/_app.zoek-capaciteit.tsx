@@ -132,13 +132,11 @@ function ZoekCapaciteit() {
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {data?.map((p) => {
-              const company = (p as { company?: { id?: string; name?: string } }).company;
+              const company = (p as { company?: { id?: string; name?: string; logo_url?: string | null } }).company;
               return (
-                <div key={p.id} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-elevated transition-shadow">
+                <div key={p.id} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-elevated hover:-translate-y-0.5 transition-all">
                   <div className="flex items-start justify-between">
-                    <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center">
-                      <HardHat className="w-5 h-5" />
-                    </div>
+                    <CompanyAvatar name={company?.name ?? p.title} logoUrl={company?.logo_url ?? null} size="md" />
                     {p.available_from && (
                       <span className="text-xs px-2 py-1 rounded-full font-medium bg-accent/20 text-accent-foreground">
                         <Calendar className="w-3 h-3 inline mr-1" />
