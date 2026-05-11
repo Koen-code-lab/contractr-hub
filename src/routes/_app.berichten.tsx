@@ -94,10 +94,10 @@ function Berichten() {
                 const active = conversations?.find((c) => c.id === currentId);
                 const title = (active as { display_title?: string } | undefined)?.display_title ?? "Gesprek";
                 const subject = (active as { subject?: string | null } | undefined)?.subject ?? null;
-                const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+                const logo = (active as { display_logo?: string | null } | undefined)?.display_logo ?? null;
                 return (
                   <div className="p-4 border-b border-border flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">{initials}</div>
+                    <CompanyAvatar name={title} logoUrl={logo} size="sm" shape="circle" />
                     <div>
                       <div className="font-semibold text-sm">{title}</div>
                       {subject && <div className="text-[11px] text-muted-foreground italic">{subject}</div>}
