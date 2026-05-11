@@ -99,9 +99,17 @@ function OpdrachtDetail() {
   });
 
   // Attachments (Bijlagen)
-  const { data: attachments = [] } = useQuery({
+  const { data: attachments = [], error: attachmentsError } = useQuery({
     queryKey: ["attachments", "project", projectId],
-    queryFn: () => fetchAttachmentsForProject(projectId),
+    queryFn: async () => {
+      const rows = await fetchAttachmentsForProject(projectId);
+      console.log("[opdracht] fetched attachments count", {
+        projectId,
+        count: rows.length,
+        sources: rows.map((row) => row.source ?? "post_attachments"),
+      });
+      return rows;
+    },
   });
 
   // Owner: list of interested companies
@@ -342,7 +350,14 @@ function OpdrachtDetail() {
         </section>
       )}
 
-      <AttachmentsViewer attachments={attachments} />
+      {attachmentsError ? (
+        <section className="bg-card rounded-2xl border border-border p-6 shadow-card mb-6">
+          <h3 className="font-display font-semibold text-lg mb-2">Bijlagen</h3>
+          <p className="text-sm text-muted-foreground">Bijlagen konden niet geladen worden</p>
+        </section>
+      ) : (
+        <AttachmentsViewer attachments={attachments} />
+      )}
 
       {isOwner && (
         <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
