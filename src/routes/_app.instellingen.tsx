@@ -233,7 +233,8 @@ function BedrijfSection() {
         id = data.id;
         const { error: pErr } = await supabase
           .from("profiles")
-          .upsert({ id: user.id, company_id: id }, { onConflict: "id" });
+          .update({ company_id: id })
+          .eq("id", user.id);
         if (pErr) throw pErr;
       }
       const { error: uErr } = await supabase
