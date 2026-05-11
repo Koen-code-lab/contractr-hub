@@ -6,8 +6,17 @@ import { LoadingState, ErrorState, EmptyState } from "@/components/States";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
-  ArrowLeft, Briefcase, MapPin, Calendar, Building2, Circle,
-  MessageSquare, Edit, UserPlus, Sparkles, Check,
+  ArrowLeft,
+  Briefcase,
+  MapPin,
+  Calendar,
+  Building2,
+  Circle,
+  MessageSquare,
+  Edit,
+  UserPlus,
+  Sparkles,
+  Check,
 } from "lucide-react";
 import {
   getOrCreateCompanyConversation,
@@ -28,13 +37,22 @@ export const Route = createFileRoute("/_app/opdracht/$projectId")({
 });
 
 const statusLabel: Record<string, string> = {
-  actief: "Open", in_gesprek: "In gesprek", gesloten: "Gesloten", verlopen: "Verlopen",
-  concept: "Concept", gepauzeerd: "Gepauzeerd", gearchiveerd: "Gearchiveerd",
+  actief: "Open",
+  in_gesprek: "In gesprek",
+  gesloten: "Gesloten",
+  verlopen: "Verlopen",
+  concept: "Concept",
+  gepauzeerd: "Gepauzeerd",
+  gearchiveerd: "Gearchiveerd",
 };
 
 function formatBudget(b: number | null | undefined) {
   if (b == null) return "—";
-  return new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(b));
+  return new Intl.NumberFormat("nl-BE", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(Number(b));
 }
 
 function normalizeTitle(s: string | null | undefined) {
@@ -99,9 +117,17 @@ function OpdrachtDetail() {
   });
 
   // Attachments (Bijlagen)
-  const { data: attachments = [] } = useQuery({
+  const { data: attachments = [], error: attachmentsError } = useQuery({
     queryKey: ["attachments", "project", projectId],
-    queryFn: () => fetchAttachmentsForProject(projectId),
+    queryFn: async () => {
+      const rows = await fetchAttachmentsForProject(projectId);
+      console.log("[opdracht] fetched attachments count", {
+        projectId,
+        count: rows.length,
+        sources: rows.map((row) => row.source ?? "post_attachments"),
+      });
+      return rows;
+    },
   });
 
   // Owner: list of interested companies
@@ -116,7 +142,9 @@ function OpdrachtDetail() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       const list = (rows ?? []) as ProjectInterestRow[];
-      const companyIds = Array.from(new Set(list.map((r) => r.interested_company_id).filter(Boolean) as string[]));
+      const companyIds = Array.from(
+        new Set(list.map((r) => r.interested_company_id).filter(Boolean) as string[]),
+      );
       const userIds = Array.from(new Set(list.map((r) => r.interested_user_id)));
       const [{ data: companies }, { data: profiles }] = await Promise.all([
         companyIds.length
@@ -130,7 +158,7 @@ function OpdrachtDetail() {
       const pm = new Map((profiles ?? []).map((p) => [p.id, p]));
       return list.map((r) => ({
         ...r,
-        company: r.interested_company_id ? cm.get(r.interested_company_id) ?? null : null,
+        company: r.interested_company_id ? (cm.get(r.interested_company_id) ?? null) : null,
         profile: pm.get(r.interested_user_id) ?? null,
       }));
     },
@@ -138,9 +166,15 @@ function OpdrachtDetail() {
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState error={error} />;
-  if (!data) return <EmptyState title="Opdracht niet gevonden" description="Deze opdracht bestaat niet (meer)." />;
+  if (!data)
+    return (
+      <EmptyState title="Opdracht niet gevonden" description="Deze opdracht bestaat niet (meer)." />
+    );
 
-  const company = joinedCompany ?? fallbackCompany ?? (projectCompanyId ? { id: projectCompanyId, name: "" } : null);
+  const company =
+    joinedCompany ??
+    fallbackCompany ??
+    (projectCompanyId ? { id: projectCompanyId, name: "" } : null);
 
   if (typeof window !== "undefined") {
     console.log("[opdracht] company resolution", {
@@ -158,16 +192,19 @@ function OpdrachtDetail() {
   const ownerCompanyId = company?.id ?? projectCompanyId;
   const myConn = (connections ?? []).find((c) => {
     if (!ownerCompanyId) return false;
-    return (
-      c.requester_company_id === ownerCompanyId ||
-      c.addressee_company_id === ownerCompanyId
-    );
+    return c.requester_company_id === ownerCompanyId || c.addressee_company_id === ownerCompanyId;
   });
-  const connStatus: "none" | "pending" | "accepted" =
-    !myConn ? "none" : myConn.status === "accepted" ? "accepted" : "pending";
+  const connStatus: "none" | "pending" | "accepted" = !myConn
+    ? "none"
+    : myConn.status === "accepted"
+      ? "accepted"
+      : "pending";
 
   const handleMessage = async () => {
-    if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    if (!company?.id || !user) {
+      toast.error("Geen bedrijf gekoppeld.");
+      return;
+    }
     if (!requireCompany()) return;
     setBusy("msg");
     try {
@@ -185,24 +222,36 @@ function OpdrachtDetail() {
         });
       }
       navigate({ to: "/berichten", search: { c: conversationId } as never });
-    } catch (e) { toast.error((e as Error).message); }
-    finally { setBusy(null); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   const handleConnect = async () => {
-    if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    if (!company?.id || !user) {
+      toast.error("Geen bedrijf gekoppeld.");
+      return;
+    }
     if (!requireCompany()) return;
     setBusy("connect");
     try {
       await requestCompanyConnection(user.id, company.id);
       toast.success("Verzoek verzonden.");
       qc.invalidateQueries({ queryKey: ["connections"] });
-    } catch (e) { toast.error((e as Error).message); }
-    finally { setBusy(null); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   const handleInterest = async () => {
-    if (!user) { toast.error("Niet ingelogd."); return; }
+    if (!user) {
+      toast.error("Niet ingelogd.");
+      return;
+    }
     if (!requireCompany()) return;
     setBusy("interest");
     try {
@@ -227,8 +276,11 @@ function OpdrachtDetail() {
       toast.success("Interesse verstuurd");
       qc.invalidateQueries({ queryKey: ["project-interest-mine", projectId] });
       qc.invalidateQueries({ queryKey: ["project-interests", projectId] });
-    } catch (e) { toast.error((e as Error).message); }
-    finally { setBusy(null); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -237,7 +289,10 @@ function OpdrachtDetail() {
         title={title}
         subtitle={data.category ?? undefined}
         actions={
-          <Link to="/bekijk-opdrachten" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium">
+          <Link
+            to="/bekijk-opdrachten"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium"
+          >
             <ArrowLeft className="w-4 h-4" /> Terug naar opdrachten
           </Link>
         }
@@ -256,14 +311,22 @@ function OpdrachtDetail() {
                   {statusLabel[data.status] ?? data.status}
                 </span>
                 {data.urgency && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">{data.urgency}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">
+                    {data.urgency}
+                  </span>
                 )}
               </div>
               <h2 className="font-display font-bold text-2xl leading-tight">{title}</h2>
               {company?.name && (
                 <div className="text-sm text-muted-foreground flex items-center gap-1 mt-2">
                   <Building2 className="w-3.5 h-3.5" />
-                  <Link to="/bedrijven/$companyId" params={{ companyId: company.id }} className="hover:underline">{company.name}</Link>
+                  <Link
+                    to="/bedrijven/$companyId"
+                    params={{ companyId: company.id }}
+                    className="hover:underline"
+                  >
+                    {company.name}
+                  </Link>
                 </div>
               )}
             </div>
@@ -295,9 +358,22 @@ function OpdrachtDetail() {
                         title={orphanTitle}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-60"
                       >
-                        {alreadyInterested ? (<><Check className="w-4 h-4" /> Interesse verstuurd</>) : (<><Sparkles className="w-4 h-4" /> Interesse tonen</>)}
+                        {alreadyInterested ? (
+                          <>
+                            <Check className="w-4 h-4" /> Interesse verstuurd
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" /> Interesse tonen
+                          </>
+                        )}
                       </button>
-                      <button onClick={handleMessage} disabled={busy !== null || orphan} title={orphanTitle} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+                      <button
+                        onClick={handleMessage}
+                        disabled={busy !== null || orphan}
+                        title={orphanTitle}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50"
+                      >
                         <MessageSquare className="w-4 h-4" /> Bericht
                       </button>
                       <button
@@ -307,7 +383,11 @@ function OpdrachtDetail() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-60"
                       >
                         <UserPlus className="w-4 h-4" />
-                        {connStatus === "accepted" ? "Verbonden" : connStatus === "pending" ? "Verzoek verzonden" : "Verbind"}
+                        {connStatus === "accepted"
+                          ? "Verbonden"
+                          : connStatus === "pending"
+                            ? "Verzoek verzonden"
+                            : "Verbind"}
                       </button>
                     </>
                   );
@@ -319,47 +399,83 @@ function OpdrachtDetail() {
 
         <div className="border-t border-border mt-5 pt-4 flex flex-wrap gap-5 text-sm text-muted-foreground">
           {locUrl ? (
-            <a href={locUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-foreground hover:underline">
+            <a
+              href={locUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+            >
               <MapPin className="w-4 h-4" /> {data.location || data.region}
             </a>
           ) : (
             (data.location || data.region) && (
-              <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {data.location || data.region}</span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4" /> {data.location || data.region}
+              </span>
             )
           )}
           {data.location && data.region && data.location !== data.region && (
             <span className="flex items-center gap-1.5 text-xs">({data.region})</span>
           )}
-          {data.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline {new Date(data.deadline).toLocaleDateString("nl-BE")}</span>}
-          {data.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Start {new Date(data.start_date).toLocaleDateString("nl-BE")}</span>}
+          {data.deadline && (
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" /> Deadline{" "}
+              {new Date(data.deadline).toLocaleDateString("nl-BE")}
+            </span>
+          )}
+          {data.start_date && (
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" /> Start{" "}
+              {new Date(data.start_date).toLocaleDateString("nl-BE")}
+            </span>
+          )}
         </div>
       </div>
 
       {data.description && (
         <section className="bg-card rounded-2xl border border-border p-6 shadow-card mb-6">
           <h3 className="font-display font-semibold text-lg mb-3">Omschrijving</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{data.description}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
+            {data.description}
+          </p>
         </section>
       )}
 
-      <AttachmentsViewer attachments={attachments} />
+      {attachmentsError ? (
+        <section className="bg-card rounded-2xl border border-border p-6 shadow-card mb-6">
+          <h3 className="font-display font-semibold text-lg mb-2">Bijlagen</h3>
+          <p className="text-sm text-muted-foreground">Bijlagen konden niet geladen worden</p>
+        </section>
+      ) : (
+        <AttachmentsViewer attachments={attachments} />
+      )}
 
       {isOwner && (
         <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
           <h3 className="font-display font-semibold text-lg mb-4">Geïnteresseerde bedrijven</h3>
-          {(!interests || interests.length === 0) ? (
+          {!interests || interests.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nog geen interesses ontvangen.</p>
           ) : (
             <ul className="divide-y divide-border">
               {interests.map((it) => {
                 const name = it.company?.name ?? it.profile?.full_name ?? "Onbekend";
                 return (
-                  <li key={it.id} className="py-3 flex flex-wrap items-center gap-3 justify-between">
+                  <li
+                    key={it.id}
+                    className="py-3 flex flex-wrap items-center gap-3 justify-between"
+                  >
                     <div className="min-w-0">
                       <div className="font-semibold text-sm">{name}</div>
-                      {it.message && <div className="text-xs text-muted-foreground truncate">{it.message}</div>}
+                      {it.message && (
+                        <div className="text-xs text-muted-foreground truncate">{it.message}</div>
+                      )}
                       <div className="text-[11px] text-muted-foreground mt-0.5">
-                        {new Date(it.created_at).toLocaleString("nl-BE", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(it.created_at).toLocaleString("nl-BE", {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -375,9 +491,14 @@ function OpdrachtDetail() {
                       <button
                         onClick={async () => {
                           if (!user || !it.interested_company_id) {
-                            toast.error("Geen bedrijf gekoppeld."); return;
+                            toast.error("Geen bedrijf gekoppeld.");
+                            return;
                           }
-                          const conversationId = await getOrCreateCompanyConversation(user.id, it.interested_company_id, projectId);
+                          const conversationId = await getOrCreateCompanyConversation(
+                            user.id,
+                            it.interested_company_id,
+                            projectId,
+                          );
                           navigate({ to: "/berichten", search: { c: conversationId } as never });
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-semibold"

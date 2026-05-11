@@ -4,12 +4,13 @@ export type Attachment = {
   id: string;
   project_id: string | null;
   capacity_post_id: string | null;
-  uploaded_by: string;
+  uploaded_by: string | null;
   file_name: string;
   file_type: string | null;
   file_url: string;
   storage_path: string;
   created_at: string;
+  source?: "post_attachments" | "project_files";
 };
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -29,6 +30,52 @@ export function isImageAttachment(a: Pick<Attachment, "file_type" | "file_name">
   return ["jpg", "jpeg", "png", "webp", "gif"].includes(ext);
 }
 
+function storagePathFromPublicUrl(url: string) {
+  const marker = "/storage/v1/object/public/project-files/";
+  const idx = url.indexOf(marker);
+  if (idx >= 0) return decodeURIComponent(url.slice(idx + marker.length));
+  return url;
+}
+
+function mergeProjectAttachments(
+  postRows: Attachment[],
+  legacyRows: Array<{
+    id: string;
+    project_id: string;
+    file_name: string;
+    file_type: string | null;
+    file_url: string;
+    uploaded_at: string;
+  }>,
+) {
+  const seen = new Set<string>();
+  const merged: Attachment[] = [];
+  for (const row of postRows) {
+    const key = row.storage_path || row.file_url;
+    seen.add(key);
+    merged.push({ ...row, source: "post_attachments" });
+  }
+  for (const row of legacyRows) {
+    const storagePath = storagePathFromPublicUrl(row.file_url);
+    const key = storagePath || row.file_url;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push({
+      id: row.id,
+      project_id: row.project_id,
+      capacity_post_id: null,
+      uploaded_by: null,
+      file_name: row.file_name,
+      file_type: row.file_type,
+      file_url: row.file_url,
+      storage_path: storagePath,
+      created_at: row.uploaded_at,
+      source: "project_files",
+    });
+  }
+  return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
 type UploadTarget =
   | { projectId: string; capacityPostId?: undefined }
   | { capacityPostId: string; projectId?: undefined };
@@ -41,18 +88,38 @@ export async function uploadAttachments(
   const failed: string[] = [];
   for (const file of files) {
     const err = validateAttachment(file);
-    if (err) { failed.push(file.name); continue; }
+    if (err) {
+      failed.push(file.name);
+      continue;
+    }
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const parentId = target.projectId ?? target.capacityPostId!;
     const folder = target.projectId ? "projects" : "capacity";
     const path = `${userId}/${folder}/${parentId}/${Date.now()}-${safe}`;
+    console.log("[attachments] upload start", {
+      fileName: file.name,
+      resolvedProjectId: target.projectId ?? null,
+      resolvedCapacityPostId: target.capacityPostId ?? null,
+      storagePath: path,
+    });
     const up = await supabase.storage.from("project-files").upload(path, file, {
       contentType: file.type || undefined,
       upsert: false,
     });
-    if (up.error) { failed.push(file.name); continue; }
+    if (up.error) {
+      console.error("[attachments] storage upload failed", up.error);
+      failed.push(file.name);
+      continue;
+    }
     const { data: pub } = supabase.storage.from("project-files").getPublicUrl(up.data.path);
-    const { error: insErr } = await supabase.from("post_attachments" as never).insert({
+    console.log("[attachments] uploaded file URL", {
+      fileName: file.name,
+      fileUrl: pub.publicUrl,
+      storagePath: up.data.path,
+      resolvedProjectId: target.projectId ?? null,
+      resolvedCapacityPostId: target.capacityPostId ?? null,
+    });
+    const row = {
       project_id: target.projectId ?? null,
       capacity_post_id: target.capacityPostId ?? null,
       uploaded_by: userId,
@@ -60,10 +127,19 @@ export async function uploadAttachments(
       file_type: file.type || null,
       file_url: pub.publicUrl,
       storage_path: up.data.path,
-    } as never);
+    };
+    console.log("[attachments] inserting attachment row", row);
+    const { data: inserted, error: insErr } = await supabase
+      .from("post_attachments")
+      .insert(row)
+      .select("*")
+      .single();
     if (insErr) {
+      console.error("[attachments] metadata insert failed", insErr);
       await supabase.storage.from("project-files").remove([up.data.path]);
       failed.push(file.name);
+    } else {
+      console.log("[attachments] inserted attachment row", inserted);
     }
   }
   return { failed };
@@ -71,7 +147,10 @@ export async function uploadAttachments(
 
 export async function deleteAttachment(att: Pick<Attachment, "id" | "storage_path">) {
   await supabase.storage.from("project-files").remove([att.storage_path]);
-  const { error } = await supabase.from("post_attachments" as never).delete().eq("id", att.id);
+  const { error } = await supabase
+    .from("post_attachments" as never)
+    .delete()
+    .eq("id", att.id);
   if (error) throw error;
 }
 
@@ -82,7 +161,30 @@ export async function fetchAttachmentsForProject(projectId: string): Promise<Att
     .eq("project_id", projectId)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as unknown as Attachment[];
+  const { data: legacy, error: legacyError } = await supabase
+    .from("project_files")
+    .select("id, project_id, file_name, file_type, file_url, uploaded_at")
+    .eq("project_id", projectId)
+    .order("uploaded_at", { ascending: true });
+  if (legacyError) throw legacyError;
+  const merged = mergeProjectAttachments(
+    (data ?? []) as unknown as Attachment[],
+    (legacy ?? []) as Array<{
+      id: string;
+      project_id: string;
+      file_name: string;
+      file_type: string | null;
+      file_url: string;
+      uploaded_at: string;
+    }>,
+  );
+  console.log("[attachments] fetched project attachments", {
+    projectId,
+    postAttachmentsCount: (data ?? []).length,
+    legacyProjectFilesCount: legacy?.length ?? 0,
+    totalCount: merged.length,
+  });
+  return merged;
 }
 
 export async function fetchAttachmentsForCapacity(capacityPostId: string): Promise<Attachment[]> {
@@ -92,6 +194,10 @@ export async function fetchAttachmentsForCapacity(capacityPostId: string): Promi
     .eq("capacity_post_id", capacityPostId)
     .order("created_at", { ascending: true });
   if (error) throw error;
+  console.log("[attachments] fetched capacity attachments", {
+    capacityPostId,
+    totalCount: (data ?? []).length,
+  });
   return (data ?? []) as unknown as Attachment[];
 }
 
@@ -104,30 +210,56 @@ function isImageRow(r: { file_type: string | null; file_name: string }) {
 export async function fetchAttachmentSummaries(params: {
   projectIds?: string[];
   capacityPostIds?: string[];
-}): Promise<{ projects: Map<string, AttachmentSummary>; capacity: Map<string, AttachmentSummary> }> {
+}): Promise<{
+  projects: Map<string, AttachmentSummary>;
+  capacity: Map<string, AttachmentSummary>;
+}> {
   const projects = new Map<string, AttachmentSummary>();
   const capacity = new Map<string, AttachmentSummary>();
   const bump = (m: Map<string, AttachmentSummary>, key: string, img: boolean) => {
     const cur = m.get(key) ?? { total: 0, images: 0, documents: 0 };
     cur.total += 1;
-    if (img) cur.images += 1; else cur.documents += 1;
+    if (img) cur.images += 1;
+    else cur.documents += 1;
     m.set(key, cur);
   };
   if (params.projectIds?.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("post_attachments" as never)
       .select("project_id, file_type, file_name")
       .in("project_id", params.projectIds);
-    for (const r of (data ?? []) as { project_id: string; file_type: string | null; file_name: string }[]) {
+    if (error) throw error;
+    for (const r of (data ?? []) as {
+      project_id: string;
+      file_type: string | null;
+      file_name: string;
+    }[]) {
+      bump(projects, r.project_id, isImageRow(r));
+    }
+    const { data: legacy, error: legacyError } = await supabase
+      .from("project_files")
+      .select("project_id, file_type, file_name")
+      .in("project_id", params.projectIds);
+    if (legacyError) throw legacyError;
+    for (const r of (legacy ?? []) as {
+      project_id: string;
+      file_type: string | null;
+      file_name: string;
+    }[]) {
       bump(projects, r.project_id, isImageRow(r));
     }
   }
   if (params.capacityPostIds?.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("post_attachments" as never)
       .select("capacity_post_id, file_type, file_name")
       .in("capacity_post_id", params.capacityPostIds);
-    for (const r of (data ?? []) as { capacity_post_id: string; file_type: string | null; file_name: string }[]) {
+    if (error) throw error;
+    for (const r of (data ?? []) as {
+      capacity_post_id: string;
+      file_type: string | null;
+      file_name: string;
+    }[]) {
       bump(capacity, r.capacity_post_id, isImageRow(r));
     }
   }
