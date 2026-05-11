@@ -247,24 +247,34 @@ function OpdrachtDetail() {
               </Link>
             ) : (
               <div className="flex flex-wrap gap-2 justify-end">
-                <button
-                  onClick={handleInterest}
-                  disabled={busy !== null || !!alreadyInterested}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-60"
-                >
-                  {alreadyInterested ? (<><Check className="w-4 h-4" /> Interesse verstuurd</>) : (<><Sparkles className="w-4 h-4" /> Interesse tonen</>)}
-                </button>
-                <button onClick={handleMessage} disabled={busy !== null} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
-                  <MessageSquare className="w-4 h-4" /> Bericht
-                </button>
-                <button
-                  onClick={handleConnect}
-                  disabled={busy !== null || connStatus !== "none"}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-60"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {connStatus === "accepted" ? "Verbonden" : connStatus === "pending" ? "Verzoek verzonden" : "Verbind"}
-                </button>
+                {(() => {
+                  const orphan = !company?.id;
+                  const orphanTitle = orphan ? "Bedrijfsprofiel ontbreekt" : undefined;
+                  return (
+                    <>
+                      <button
+                        onClick={handleInterest}
+                        disabled={busy !== null || !!alreadyInterested || orphan}
+                        title={orphanTitle}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-60"
+                      >
+                        {alreadyInterested ? (<><Check className="w-4 h-4" /> Interesse verstuurd</>) : (<><Sparkles className="w-4 h-4" /> Interesse tonen</>)}
+                      </button>
+                      <button onClick={handleMessage} disabled={busy !== null || orphan} title={orphanTitle} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+                        <MessageSquare className="w-4 h-4" /> Bericht
+                      </button>
+                      <button
+                        onClick={handleConnect}
+                        disabled={busy !== null || connStatus !== "none" || orphan}
+                        title={orphanTitle}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-60"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        {connStatus === "accepted" ? "Verbonden" : connStatus === "pending" ? "Verzoek verzonden" : "Verbind"}
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
