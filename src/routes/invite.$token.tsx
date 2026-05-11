@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Construction, CheckCircle2, AlertCircle } from "lucide-react";
+import { Construction, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { LoadingState } from "@/components/States";
@@ -24,10 +24,20 @@ function AcceptInvite() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("company_invitations")
-        .select("*, company:companies(id, name, logo_url)")
+        .select("*, company:companies(id, name, logo_url), inviter:companies!company_invitations_invited_by_company_id_fkey(id, name)")
+        // fallback select without optional FK alias
         .eq("token", token)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        // Retry without inviter alias in case FK is not defined
+        const { data: d2, error: e2 } = await supabase
+          .from("company_invitations")
+          .select("*, company:companies(id, name, logo_url)")
+          .eq("token", token)
+          .maybeSingle();
+        if (e2) throw e2;
+        return d2;
+      }
       return data;
     },
   });
@@ -38,11 +48,12 @@ function AcceptInvite() {
     }
   }, [loading, user, navigate, token]);
 
-  const onAccept = async () => {
-    if (!user || !invitation) return;
+  const inviteType = (invitation as { type?: string } | null | undefined)?.type ?? "team_member";
+
+  const onAcceptTeam = async () => {
+    if (!user || !invitation || !invitation.company_id) return;
     setAccepting(true);
     try {
-      // 1) Insert membership (unique constraint protects duplicates)
       const { error: mErr } = await supabase.from("company_members").insert({
         company_id: invitation.company_id,
         user_id: user.id,
@@ -51,7 +62,6 @@ function AcceptInvite() {
       });
       if (mErr && !/duplicate/i.test(mErr.message)) throw mErr;
 
-      // 2) Link profile to this company if not already linked
       const { data: prof } = await supabase
         .from("profiles")
         .select("company_id")
@@ -61,7 +71,6 @@ function AcceptInvite() {
         await supabase.from("profiles").update({ company_id: invitation.company_id }).eq("id", user.id);
       }
 
-      // 3) Mark invitation as accepted
       await supabase
         .from("company_invitations")
         .update({ status: "accepted", accepted_at: new Date().toISOString() })
@@ -70,6 +79,33 @@ function AcceptInvite() {
       toast.success("Uitnodiging geaccepteerd");
       setDone(true);
       setTimeout(() => navigate({ to: "/dashboard" }), 1500);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Accepteren mislukt");
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  const onAcceptCompany = async () => {
+    if (!user || !invitation) return;
+    setAccepting(true);
+    try {
+      await supabase
+        .from("company_invitations")
+        .update({ status: "accepted", accepted_at: new Date().toISOString() })
+        .eq("id", invitation.id);
+      toast.success("Welkom op CONTRACTR!");
+      // Check if user already has a company
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      setDone(true);
+      setTimeout(() => {
+        if (prof?.company_id) navigate({ to: "/dashboard" });
+        else navigate({ to: "/bedrijf-aanmaken" });
+      }, 1200);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Accepteren mislukt");
     } finally {
@@ -113,8 +149,27 @@ function AcceptInvite() {
         ) : done ? (
           <div className="text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-accent mx-auto" />
-            <h2 className="font-display font-semibold text-xl">Welkom in het team!</h2>
+            <h2 className="font-display font-semibold text-xl">
+              {inviteType === "team_member" ? "Welkom in het team!" : "Welkom op CONTRACTR!"}
+            </h2>
             <p className="text-sm text-muted-foreground">Je wordt doorgestuurd…</p>
+          </div>
+        ) : inviteType === "company_invite" ? (
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-accent/40 flex items-center justify-center">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <h2 className="font-display font-semibold text-2xl">Welkom op CONTRACTR</h2>
+            <p className="text-sm text-muted-foreground">
+              Je bent uitgenodigd om je bedrijf aan te sluiten bij CONTRACTR — het netwerk voor de Belgische bouwsector.
+            </p>
+            <button
+              onClick={onAcceptCompany}
+              disabled={accepting}
+              className="w-full h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
+            >
+              {accepting ? "Bezig…" : "Bedrijfsprofiel aanmaken"}
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -123,16 +178,18 @@ function AcceptInvite() {
               Word lid van <strong>{invitation.company?.name ?? "dit bedrijf"}</strong> als{" "}
               <span className="capitalize">{invitation.role}</span>.
             </p>
-            <div className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
-              Uitgenodigd e-mailadres: <strong>{invitation.email}</strong>
-              {user.email && user.email.toLowerCase() !== invitation.email.toLowerCase() && (
-                <div className="text-destructive mt-1">
-                  Let op: je bent ingelogd als {user.email}.
-                </div>
-              )}
-            </div>
+            {invitation.email && (
+              <div className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
+                Uitgenodigd e-mailadres: <strong>{invitation.email}</strong>
+                {user.email && user.email.toLowerCase() !== invitation.email.toLowerCase() && (
+                  <div className="text-destructive mt-1">
+                    Let op: je bent ingelogd als {user.email}.
+                  </div>
+                )}
+              </div>
+            )}
             <button
-              onClick={onAccept}
+              onClick={onAcceptTeam}
               disabled={accepting}
               className="w-full h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
             >
