@@ -200,19 +200,29 @@ export async function fetchAttachmentSummaries(params: {
     m.set(key, cur);
   };
   if (params.projectIds?.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("post_attachments" as never)
       .select("project_id, file_type, file_name")
       .in("project_id", params.projectIds);
+    if (error) throw error;
     for (const r of (data ?? []) as { project_id: string; file_type: string | null; file_name: string }[]) {
+      bump(projects, r.project_id, isImageRow(r));
+    }
+    const { data: legacy, error: legacyError } = await supabase
+      .from("project_files")
+      .select("project_id, file_type, file_name")
+      .in("project_id", params.projectIds);
+    if (legacyError) throw legacyError;
+    for (const r of (legacy ?? []) as { project_id: string; file_type: string | null; file_name: string }[]) {
       bump(projects, r.project_id, isImageRow(r));
     }
   }
   if (params.capacityPostIds?.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("post_attachments" as never)
       .select("capacity_post_id, file_type, file_name")
       .in("capacity_post_id", params.capacityPostIds);
+    if (error) throw error;
     for (const r of (data ?? []) as { capacity_post_id: string; file_type: string | null; file_name: string }[]) {
       bump(capacity, r.capacity_post_id, isImageRow(r));
     }
