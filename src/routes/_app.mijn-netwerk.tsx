@@ -154,7 +154,10 @@ function MijnNetwerk() {
           {companies.isLoading && <LoadingState />}
           {companies.error && <ErrorState error={companies.error} />}
           {!companies.isLoading && !companies.error && visible.length === 0 && (
-            <EmptyState title={tab === "verbonden" ? "Nog geen verbindingen" : "Nog geen bedrijven"} description="Bedrijven die zich aansluiten verschijnen hier." />
+            <div className="flex flex-col items-center gap-3">
+              <EmptyState title={tab === "verbonden" ? "Nog geen verbindingen" : "Nog geen bedrijven"} description="Nodig zelf bedrijven uit via WhatsApp om je netwerk te starten." />
+              <WhatsAppInviteButton type="company_invite" label="Nodig bedrijf uit via WhatsApp" invitedByCompanyId={myCompanyId} />
+            </div>
           )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
