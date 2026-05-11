@@ -84,8 +84,8 @@ function Berichten() {
     <>
       <PageHeader title="Berichten" subtitle="Communiceer rechtstreeks met je netwerk." />
 
-      <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden grid md:grid-cols-[320px_1fr] h-[640px]">
-        <div className="border-r border-border flex flex-col">
+      <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden grid md:grid-cols-[320px_1fr] h-[calc(100dvh-12rem)] min-h-[480px]">
+        <div className="border-r border-border flex flex-col min-h-0">
           <div className="p-4 border-b border-border">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
