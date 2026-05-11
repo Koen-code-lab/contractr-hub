@@ -165,6 +165,10 @@ function EditOpdracht() {
           </button>
         </div>
       </form>
+
+      <div className="max-w-3xl mt-6">
+        <AttachmentsEditor projectId={projectId} userId={user.id} />
+      </div>
     </>
   );
 }
