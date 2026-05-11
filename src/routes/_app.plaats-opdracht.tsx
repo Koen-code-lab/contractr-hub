@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { useCompanyGate } from "@/lib/companyGate";
 
 export const Route = createFileRoute("/_app/plaats-opdracht")({
   component: PlaatsOpdracht,
@@ -18,6 +19,7 @@ const URGENCIES = ["Niet dringend", "Binnen 1 maand", "Binnen 2 weken", "Spoed"]
 function PlaatsOpdracht() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireCompany } = useCompanyGate();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Nieuwbouw");
   const [region, setRegion] = useState("");
@@ -39,6 +41,8 @@ function PlaatsOpdracht() {
       toast.error("Log in om een opdracht te plaatsen.");
       return;
     }
+    const myCompanyId = requireCompany();
+    if (!myCompanyId) return;
     if (!title.trim()) { toast.error("Geef je opdracht een naam."); return; }
     if (!category) { toast.error("Kies een categorie."); return; }
     if (!region) { toast.error("Kies een provincie."); return; }
