@@ -262,6 +262,7 @@ function BedrijfSection() {
   };
 
   return (
+    <div className="space-y-6">
     <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
       <h3 className="font-display font-semibold text-lg mb-1">Bedrijfsgegevens</h3>
       {!companyId && (
@@ -297,7 +298,7 @@ function BedrijfSection() {
       </div>
     </section>
     {companyId && <TeamManagement companyId={companyId} />}
-    </>
+    </div>
   );
 }
 
