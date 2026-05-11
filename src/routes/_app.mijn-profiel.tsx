@@ -259,17 +259,29 @@ function ProfileEditDialog({
         companyId = data.id;
       }
 
-      // 2. upsert profile
-      const { error: pErr } = await supabase
+      // 2. patch profile — never upsert with a partial payload, that resets
+      // untouched columns (bio, phone, specialisations, …) to their defaults.
+      const profilesTable = supabase.from("profiles") as any;
+      const profilePatch: Record<string, unknown> = {
+        full_name: form.full_name || null,
+        specialisations: specs,
+        region: form.region || null,
+      };
+      if (companyId) profilePatch.company_id = companyId;
+      console.info("[mijn-profiel] update profile payload", { userId: user.id, profilePatch });
+      const { data: existing } = await supabase
         .from("profiles")
-        .upsert({
-          id: user.id,
-          full_name: form.full_name || null,
-          specialisations: specs,
-          region: form.region || null,
-          company_id: companyId,
-        }, { onConflict: "id" });
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+      const { data: savedProfile, error: pErr } = existing
+        ? await profilesTable.update(profilePatch).eq("id", user.id).select("*").maybeSingle()
+        : await profilesTable
+            .insert({ id: user.id, ...profilePatch })
+            .select("*")
+            .maybeSingle();
       if (pErr) throw pErr;
+      console.info("[mijn-profiel] saved profile row", savedProfile);
     },
     onSuccess: () => {
       toast.success("Profiel opgeslagen");

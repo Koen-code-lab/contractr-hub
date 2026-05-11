@@ -103,16 +103,25 @@ function AccountSection() {
   const onSave = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").upsert(
-      {
-        id: user.id,
-        full_name: form.full_name || null,
-        phone: form.phone || null,
-        region: form.region || null,
-        bio: form.bio || null,
-      },
-      { onConflict: "id" },
-    );
+    const patch = {
+      full_name: form.full_name || null,
+      phone: form.phone || null,
+      region: form.region || null,
+      bio: form.bio || null,
+    };
+    console.info("[settings/account] update payload", { userId: user.id, patch });
+    // Ensure row exists, then PATCH only the fields shown in this tab.
+    // Using upsert here would reset untouched columns (specialisations, company_id, etc.)
+    // to their defaults and crater the profile completeness score.
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+    const { data: saved, error } = existing
+      ? await supabase.from("profiles").update(patch).eq("id", user.id).select("*").maybeSingle()
+      : await supabase.from("profiles").insert({ id: user.id, ...patch }).select("*").maybeSingle();
+    console.info("[settings/account] saved profile row", { error, saved });
     setSaving(false);
     if (error) {
       toast.error(error.message);
@@ -224,7 +233,8 @@ function BedrijfSection() {
         id = data.id;
         const { error: pErr } = await supabase
           .from("profiles")
-          .upsert({ id: user.id, company_id: id }, { onConflict: "id" });
+          .update({ company_id: id })
+          .eq("id", user.id);
         if (pErr) throw pErr;
       }
       const { error: uErr } = await supabase
