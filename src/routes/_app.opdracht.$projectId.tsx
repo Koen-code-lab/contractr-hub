@@ -142,8 +142,9 @@ function OpdrachtDetail() {
             </div>
             {isOwner ? (
               <Link
-                to="/mijn-publicaties/$projectId/edit"
+                to="/opdracht/$projectId/edit"
                 params={{ projectId }}
+                onClick={(event) => event.stopPropagation()}
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
               >
                 <Edit className="w-4 h-4" /> Bewerk opdracht

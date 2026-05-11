@@ -188,8 +188,9 @@ function MijnPublicaties() {
                       <div className="flex gap-1 justify-end">
                         {p.type === "opdracht" ? (
                           <Link
-                            to="/mijn-publicaties/$projectId/edit"
+                            to="/opdracht/$projectId/edit"
                             params={{ projectId: p.id }}
+                            onClick={(event) => event.stopPropagation()}
                             title="Bewerken"
                             className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
                           ><Edit className="w-3.5 h-3.5" /></Link>

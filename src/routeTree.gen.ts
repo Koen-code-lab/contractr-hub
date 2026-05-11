@@ -24,7 +24,7 @@ import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
 import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
 import { Route as AppOpdrachtProjectIdRouteImport } from './routes/_app.opdracht.$projectId'
 import { Route as AppBedrijvenCompanyIdRouteImport } from './routes/_app.bedrijven.$companyId'
-import { Route as AppMijnPublicatiesProjectIdEditRouteImport } from './routes/_app.mijn-publicaties.$projectId.edit'
+import { Route as AppOpdrachtProjectIdEditRouteImport } from './routes/_app.opdracht_.$projectId.edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -100,11 +100,11 @@ const AppBedrijvenCompanyIdRoute = AppBedrijvenCompanyIdRouteImport.update({
   path: '/bedrijven/$companyId',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMijnPublicatiesProjectIdEditRoute =
-  AppMijnPublicatiesProjectIdEditRouteImport.update({
-    id: '/$projectId/edit',
-    path: '/$projectId/edit',
-    getParentRoute: () => AppMijnPublicatiesRoute,
+const AppOpdrachtProjectIdEditRoute =
+  AppOpdrachtProjectIdEditRouteImport.update({
+    id: '/opdracht_/$projectId/edit',
+    path: '/opdracht/$projectId/edit',
+    getParentRoute: () => AppRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -117,12 +117,12 @@ export interface FileRoutesByFullPath {
   '/instellingen': typeof AppInstellingenRoute
   '/mijn-netwerk': typeof AppMijnNetwerkRoute
   '/mijn-profiel': typeof AppMijnProfielRoute
-  '/mijn-publicaties': typeof AppMijnPublicatiesRouteWithChildren
+  '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
-  '/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
+  '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,12 +134,12 @@ export interface FileRoutesByTo {
   '/instellingen': typeof AppInstellingenRoute
   '/mijn-netwerk': typeof AppMijnNetwerkRoute
   '/mijn-profiel': typeof AppMijnProfielRoute
-  '/mijn-publicaties': typeof AppMijnPublicatiesRouteWithChildren
+  '/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
-  '/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
+  '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,12 +153,12 @@ export interface FileRoutesById {
   '/_app/instellingen': typeof AppInstellingenRoute
   '/_app/mijn-netwerk': typeof AppMijnNetwerkRoute
   '/_app/mijn-profiel': typeof AppMijnProfielRoute
-  '/_app/mijn-publicaties': typeof AppMijnPublicatiesRouteWithChildren
+  '/_app/mijn-publicaties': typeof AppMijnPublicatiesRoute
   '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/_app/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
   '/_app/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
-  '/_app/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
+  '/_app/opdracht_/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,7 +177,7 @@ export interface FileRouteTypes {
     | '/zoek-capaciteit'
     | '/bedrijven/$companyId'
     | '/opdracht/$projectId'
-    | '/mijn-publicaties/$projectId/edit'
+    | '/opdracht/$projectId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -194,7 +194,7 @@ export interface FileRouteTypes {
     | '/zoek-capaciteit'
     | '/bedrijven/$companyId'
     | '/opdracht/$projectId'
-    | '/mijn-publicaties/$projectId/edit'
+    | '/opdracht/$projectId/edit'
   id:
     | '__root__'
     | '/'
@@ -212,7 +212,7 @@ export interface FileRouteTypes {
     | '/_app/zoek-capaciteit'
     | '/_app/bedrijven/$companyId'
     | '/_app/opdracht/$projectId'
-    | '/_app/mijn-publicaties/$projectId/edit'
+    | '/_app/opdracht_/$projectId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -328,26 +328,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBedrijvenCompanyIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/mijn-publicaties/$projectId/edit': {
-      id: '/_app/mijn-publicaties/$projectId/edit'
-      path: '/$projectId/edit'
-      fullPath: '/mijn-publicaties/$projectId/edit'
-      preLoaderRoute: typeof AppMijnPublicatiesProjectIdEditRouteImport
-      parentRoute: typeof AppMijnPublicatiesRoute
+    '/_app/opdracht_/$projectId/edit': {
+      id: '/_app/opdracht_/$projectId/edit'
+      path: '/opdracht/$projectId/edit'
+      fullPath: '/opdracht/$projectId/edit'
+      preLoaderRoute: typeof AppOpdrachtProjectIdEditRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
-
-interface AppMijnPublicatiesRouteChildren {
-  AppMijnPublicatiesProjectIdEditRoute: typeof AppMijnPublicatiesProjectIdEditRoute
-}
-
-const AppMijnPublicatiesRouteChildren: AppMijnPublicatiesRouteChildren = {
-  AppMijnPublicatiesProjectIdEditRoute: AppMijnPublicatiesProjectIdEditRoute,
-}
-
-const AppMijnPublicatiesRouteWithChildren =
-  AppMijnPublicatiesRoute._addFileChildren(AppMijnPublicatiesRouteChildren)
 
 interface AppRouteChildren {
   AppBekijkOpdrachtenRoute: typeof AppBekijkOpdrachtenRoute
@@ -357,11 +346,12 @@ interface AppRouteChildren {
   AppInstellingenRoute: typeof AppInstellingenRoute
   AppMijnNetwerkRoute: typeof AppMijnNetwerkRoute
   AppMijnProfielRoute: typeof AppMijnProfielRoute
-  AppMijnPublicatiesRoute: typeof AppMijnPublicatiesRouteWithChildren
+  AppMijnPublicatiesRoute: typeof AppMijnPublicatiesRoute
   AppPlaatsOpdrachtRoute: typeof AppPlaatsOpdrachtRoute
   AppZoekCapaciteitRoute: typeof AppZoekCapaciteitRoute
   AppBedrijvenCompanyIdRoute: typeof AppBedrijvenCompanyIdRoute
   AppOpdrachtProjectIdRoute: typeof AppOpdrachtProjectIdRoute
+  AppOpdrachtProjectIdEditRoute: typeof AppOpdrachtProjectIdEditRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -372,11 +362,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppInstellingenRoute: AppInstellingenRoute,
   AppMijnNetwerkRoute: AppMijnNetwerkRoute,
   AppMijnProfielRoute: AppMijnProfielRoute,
-  AppMijnPublicatiesRoute: AppMijnPublicatiesRouteWithChildren,
+  AppMijnPublicatiesRoute: AppMijnPublicatiesRoute,
   AppPlaatsOpdrachtRoute: AppPlaatsOpdrachtRoute,
   AppZoekCapaciteitRoute: AppZoekCapaciteitRoute,
   AppBedrijvenCompanyIdRoute: AppBedrijvenCompanyIdRoute,
   AppOpdrachtProjectIdRoute: AppOpdrachtProjectIdRoute,
+  AppOpdrachtProjectIdEditRoute: AppOpdrachtProjectIdEditRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -389,3 +380,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

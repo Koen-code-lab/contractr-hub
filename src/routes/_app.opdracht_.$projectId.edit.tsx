@@ -9,7 +9,7 @@ import { BELGIAN_REGIONS } from "@/lib/regions";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/mijn-publicaties/$projectId/edit")({
+export const Route = createFileRoute("/_app/opdracht_/$projectId/edit")({
   component: EditOpdracht,
 });
 
@@ -62,7 +62,7 @@ function EditOpdracht() {
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState error={error} />;
   if (!data) return <EmptyState title="Niet gevonden" description="Deze opdracht bestaat niet." />;
-  if (user && data.created_by !== user.id) {
+  if (!user || data.created_by !== user.id) {
     return <EmptyState title="Geen toegang" description="Je kan enkel je eigen publicaties bewerken." />;
   }
 
@@ -84,12 +84,12 @@ function EditOpdracht() {
       urgency: form.urgency || null,
       description: form.description || null,
       status: form.status,
-    }).eq("id", projectId);
+    }).eq("id", projectId).eq("created_by", user.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Opgeslagen.");
     qc.invalidateQueries({ queryKey: ["project", projectId] });
-    qc.invalidateQueries({ queryKey: ["my-projects", user?.id] });
+    qc.invalidateQueries({ queryKey: ["my-projects", user.id] });
     navigate({ to: "/opdracht/$projectId", params: { projectId } });
   };
 
