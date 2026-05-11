@@ -259,11 +259,11 @@ export function useConversations() {
 
       const [companiesRes, profilesRes, projectsRes] = await Promise.all([
         companyIds.length
-          ? supabase.from("companies").select("id, name").in("id", companyIds)
-          : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+          ? supabase.from("companies").select("id, name, logo_url").in("id", companyIds)
+          : Promise.resolve({ data: [] as { id: string; name: string; logo_url: string | null }[] }),
         profileIds.length
-          ? supabase.from("profiles").select("id, full_name, company_id").in("id", profileIds)
-          : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null }[] }),
+          ? supabase.from("profiles").select("id, full_name, company_id, avatar_url").in("id", profileIds)
+          : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null; avatar_url: string | null }[] }),
         projectIds.length
           ? supabase.from("projects").select("id, title").in("id", projectIds)
           : Promise.resolve({ data: [] as { id: string; title: string }[] }),
