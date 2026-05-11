@@ -98,6 +98,12 @@ function OpdrachtDetail() {
     },
   });
 
+  // Attachments (Bijlagen)
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["attachments", "project", projectId],
+    queryFn: () => fetchAttachmentsForProject(projectId),
+  });
+
   // Owner: list of interested companies
   const { data: interests } = useQuery({
     queryKey: ["project-interests", projectId],
