@@ -200,13 +200,31 @@ export function TeamManagement({ companyId }: { companyId: string }) {
         <div>
           <h4 className="text-sm font-medium mb-2">Openstaande uitnodigingen</h4>
           <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
-            {invitations.map((inv) => (
+            {invitations.map((inv) => {
+              const channel = (inv as { channel?: string | null }).channel;
+              return (
               <div key={inv.id} className="flex items-center gap-3 p-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
+                {channel === "whatsapp" ? (
+                  <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                ) : (
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">{inv.email}</div>
-                  <div className="text-xs text-muted-foreground capitalize">{inv.role}</div>
+                  <div className="text-sm truncate">{inv.email ?? "WhatsApp uitnodiging"}</div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {inv.role} · {new Date(inv.created_at).toLocaleDateString("nl-BE")}
+                  </div>
                 </div>
+                <button
+                  onClick={() => {
+                    const link = inviteLink(inv.token);
+                    openWhatsApp(buildWhatsAppMessage("team_member", link));
+                  }}
+                  className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#25D366]"
+                  title="Opnieuw via WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => copyInviteLink(inv.token)}
                   className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
