@@ -143,36 +143,48 @@ export type Database = {
       company_invitations: {
         Row: {
           accepted_at: string | null
-          company_id: string
+          channel: string | null
+          company_id: string | null
           created_at: string
-          email: string
+          email: string | null
           id: string
           invited_by: string
+          invited_by_company_id: string | null
           role: string
           status: string
+          target_company_id: string | null
           token: string
+          type: string
         }
         Insert: {
           accepted_at?: string | null
-          company_id: string
+          channel?: string | null
+          company_id?: string | null
           created_at?: string
-          email: string
+          email?: string | null
           id?: string
           invited_by: string
+          invited_by_company_id?: string | null
           role?: string
           status?: string
+          target_company_id?: string | null
           token?: string
+          type?: string
         }
         Update: {
           accepted_at?: string | null
-          company_id?: string
+          channel?: string | null
+          company_id?: string | null
           created_at?: string
-          email?: string
+          email?: string | null
           id?: string
           invited_by?: string
+          invited_by_company_id?: string | null
           role?: string
           status?: string
+          target_company_id?: string | null
           token?: string
+          type?: string
         }
         Relationships: [
           {
