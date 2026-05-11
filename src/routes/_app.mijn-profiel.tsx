@@ -354,6 +354,46 @@ function ProfileEditDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          <div className="grid grid-cols-2 gap-4">
+            <ImageUploadField
+              label="Bedrijfslogo"
+              value={logoUrl}
+              busy={uploading === "logo"}
+              onPick={() => logoInputRef.current?.click()}
+              onClear={() => setLogoUrl(null)}
+              shape="rounded"
+            />
+            <ImageUploadField
+              label="Profielfoto (avatar)"
+              value={avatarUrl}
+              busy={uploading === "avatar"}
+              onPick={() => avatarInputRef.current?.click()}
+              onClear={() => setAvatarUrl(null)}
+              shape="circle"
+            />
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageUpload(f, "logo");
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageUpload(f, "avatar");
+                e.target.value = "";
+              }}
+            />
+          </div>
           <Field label="Naam">
             <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
           </Field>
