@@ -31,9 +31,18 @@ export async function createInvitation(input: CreateInviteInput) {
   return data;
 }
 
+const PRODUCTION_ORIGIN = "https://contractr-platform.lovable.app";
+
 export function inviteLink(token: string) {
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://contractr-platform.lovable.app";
+  let origin = PRODUCTION_ORIGIN;
+  if (typeof window !== "undefined" && window.location?.origin) {
+    const current = window.location.origin;
+    // Use production domain for lovable preview/sandbox hosts so shared links always work
+    const isPreview =
+      /\.lovable\.app$/.test(window.location.hostname) &&
+      window.location.hostname !== "contractr-platform.lovable.app";
+    origin = isPreview ? PRODUCTION_ORIGIN : current;
+  }
   return `${origin}/invite/${token}`;
 }
 
