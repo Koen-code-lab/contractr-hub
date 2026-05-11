@@ -9,14 +9,16 @@ import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_app/berichten")({
+  validateSearch: (s: Record<string, unknown>) => ({ c: typeof s.c === "string" ? s.c : undefined }),
   component: Berichten,
 });
 
 function Berichten() {
   const { user } = useAuth();
+  const { c: deepLinkId } = Route.useSearch();
   const { data: conversations, isLoading, error } = useConversations();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const currentId = activeId ?? conversations?.[0]?.id ?? null;
+  const currentId = activeId ?? deepLinkId ?? conversations?.[0]?.id ?? null;
   const { data: messages } = useMessages(currentId);
   const [draft, setDraft] = useState("");
   const qc = useQueryClient();
@@ -50,6 +52,7 @@ function Berichten() {
             {conversations?.map((c) => {
               const isActive = c.id === currentId;
               const title = (c as { display_title?: string }).display_title ?? "Gesprek";
+              const subject = (c as { subject?: string | null }).subject ?? null;
               const last = (c as { last_message?: { body: string; created_at: string } | null }).last_message;
               const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
               return (
@@ -69,6 +72,7 @@ function Berichten() {
                           {new Date(last?.created_at ?? c.last_message_at).toLocaleDateString("nl-BE", { day: "2-digit", month: "short" })}
                         </div>
                       </div>
+                      {subject && <div className="text-[11px] text-muted-foreground truncate italic">{subject}</div>}
                       <div className="text-xs text-muted-foreground truncate mt-0.5">
                         {last?.body ?? "Nog geen berichten"}
                       </div>
@@ -90,12 +94,14 @@ function Berichten() {
               {(() => {
                 const active = conversations?.find((c) => c.id === currentId);
                 const title = (active as { display_title?: string } | undefined)?.display_title ?? "Gesprek";
+                const subject = (active as { subject?: string | null } | undefined)?.subject ?? null;
                 const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
                 return (
                   <div className="p-4 border-b border-border flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">{initials}</div>
                     <div>
                       <div className="font-semibold text-sm">{title}</div>
+                      {subject && <div className="text-[11px] text-muted-foreground italic">{subject}</div>}
                       <div className="text-xs text-muted-foreground">{messages?.length ?? 0} berichten</div>
                     </div>
                   </div>

@@ -226,17 +226,24 @@ export function useConversations() {
       const profileIds = Array.from(new Set(
         convos.flatMap((c) => [c.participant_a, c.participant_b]).filter(Boolean) as string[],
       ));
+      const projectIds = Array.from(new Set(
+        convos.map((c) => (c as { project_id?: string | null }).project_id).filter(Boolean) as string[],
+      ));
 
-      const [companiesRes, profilesRes] = await Promise.all([
+      const [companiesRes, profilesRes, projectsRes] = await Promise.all([
         companyIds.length
           ? supabase.from("companies").select("id, name").in("id", companyIds)
           : Promise.resolve({ data: [] as { id: string; name: string }[] }),
         profileIds.length
           ? supabase.from("profiles").select("id, full_name, company_id").in("id", profileIds)
           : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null }[] }),
+        projectIds.length
+          ? supabase.from("projects").select("id, title").in("id", projectIds)
+          : Promise.resolve({ data: [] as { id: string; title: string }[] }),
       ]);
       const companyMap = new Map((companiesRes.data ?? []).map((c) => [c.id, c]));
       const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.id, p]));
+      const projectMap = new Map((projectsRes.data ?? []).map((p) => [p.id, p]));
 
       const enriched = await Promise.all(
         convos.map(async (c) => {
@@ -251,12 +258,18 @@ export function useConversations() {
           const otherProfile = otherId ? profileMap.get(otherId) : null;
           const targetCompany = c.target_company_id ? companyMap.get(c.target_company_id) : null;
           const otherCompany = otherProfile?.company_id ? companyMap.get(otherProfile.company_id) : null;
+          const pid = (c as { project_id?: string | null }).project_id ?? null;
+          const project = pid ? projectMap.get(pid) ?? null : null;
+          const companyName = targetCompany?.name ?? otherCompany?.name ?? otherProfile?.full_name ?? "Gesprek";
+          const projectTitle = project?.title?.replace(/[\s.,;:!?]+$/u, "").trim() ?? null;
           return {
             ...c,
             last_message: last,
             target_company: targetCompany ?? null,
             other_profile: otherProfile ?? null,
-            display_title: targetCompany?.name ?? otherCompany?.name ?? otherProfile?.full_name ?? "Gesprek",
+            project: project ?? null,
+            display_title: companyName,
+            subject: projectTitle ? `mbt: ${projectTitle}` : null,
           };
         }),
       );

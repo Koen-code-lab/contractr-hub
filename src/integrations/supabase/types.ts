@@ -177,6 +177,7 @@ export type Database = {
           last_message_at: string
           participant_a: string
           participant_b: string | null
+          project_id: string | null
           target_company_id: string | null
         }
         Insert: {
@@ -185,6 +186,7 @@ export type Database = {
           last_message_at?: string
           participant_a: string
           participant_b?: string | null
+          project_id?: string | null
           target_company_id?: string | null
         }
         Update: {
@@ -193,6 +195,7 @@ export type Database = {
           last_message_at?: string
           participant_a?: string
           participant_b?: string | null
+          project_id?: string | null
           target_company_id?: string | null
         }
         Relationships: []
@@ -316,6 +319,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_interests: {
+        Row: {
+          created_at: string
+          id: string
+          interested_company_id: string | null
+          interested_user_id: string
+          message: string | null
+          owner_company_id: string | null
+          owner_user_id: string
+          project_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interested_company_id?: string | null
+          interested_user_id: string
+          message?: string | null
+          owner_company_id?: string | null
+          owner_user_id: string
+          project_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interested_company_id?: string | null
+          interested_user_id?: string
+          message?: string | null
+          owner_company_id?: string | null
+          owner_user_id?: string
+          project_id?: string
+          status?: string
+        }
+        Relationships: []
       }
       projects: {
         Row: {
