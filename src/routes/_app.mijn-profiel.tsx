@@ -297,6 +297,7 @@ function ProfileEditDialog({
         certifications: certs,
         recent_projects: projects,
         description: form.description || null,
+        logo_url: logoUrl,
       };
 
       const companiesTable = supabase.from("companies") as any;
@@ -316,6 +317,7 @@ function ProfileEditDialog({
         full_name: form.full_name || null,
         specialisations: specs,
         region: form.region || null,
+        avatar_url: avatarUrl,
       };
       if (companyId) profilePatch.company_id = companyId;
       console.info("[mijn-profiel] update profile payload", { userId: user.id, profilePatch });
