@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/PageHeader";
-import { MapPin, CheckCircle2, Award, Building2, Calendar } from "lucide-react";
+import { MapPin, CheckCircle2, Award, Building2, Calendar, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/mijn-profiel")({
   component: MijnProfiel,
