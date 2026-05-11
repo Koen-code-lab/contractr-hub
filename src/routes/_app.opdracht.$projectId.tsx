@@ -113,12 +113,39 @@ function OpdrachtDetail() {
   if (error) return <ErrorState error={error} />;
   if (!data) return <EmptyState title="Opdracht niet gevonden" description="Deze opdracht bestaat niet (meer)." />;
 
-  const company = (data as { company?: { id: string; name: string } | null }).company ?? null;
+  const joinedCompany = (data as { company?: { id: string; name: string } | null }).company ?? null;
+  const projectCompanyId = (data as { company_id?: string | null }).company_id ?? null;
+
+  // Fallback: if relation didn't load but company_id is set, fetch separately
+  const { data: fallbackCompany } = useQuery({
+    queryKey: ["company-fallback", projectCompanyId],
+    enabled: !!projectCompanyId && !joinedCompany,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("id", projectCompanyId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const company = joinedCompany ?? fallbackCompany ?? (projectCompanyId ? { id: projectCompanyId, name: "" } : null);
+
+  if (typeof window !== "undefined") {
+    console.log("[opdracht] company resolution", {
+      projectCompanyId,
+      joinedCompany,
+      fallbackCompany,
+      ownerCompanyResolved: !!company?.id,
+    });
+  }
+
   const title = normalizeTitle(data.title);
   const locUrl = mapsUrl(data.location, data.region);
 
   // Connection state with owner company
-  const ownerCompanyId = company?.id ?? null;
+  const ownerCompanyId = company?.id ?? projectCompanyId;
   const myConn = (connections ?? []).find((c) => {
     if (!ownerCompanyId) return false;
     return (
