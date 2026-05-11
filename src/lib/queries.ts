@@ -289,6 +289,11 @@ export function useConversations() {
           const project = pid ? projectMap.get(pid) ?? null : null;
           const companyName = targetCompany?.name ?? otherCompany?.name ?? otherProfile?.full_name ?? "Gesprek";
           const projectTitle = project?.title?.replace(/[\s.,;:!?]+$/u, "").trim() ?? null;
+          const displayLogo =
+            (targetCompany as { logo_url?: string | null } | null)?.logo_url ??
+            (otherCompany as { logo_url?: string | null } | null)?.logo_url ??
+            (otherProfile as { avatar_url?: string | null } | null)?.avatar_url ??
+            null;
           return {
             ...c,
             last_message: last,
@@ -296,6 +301,7 @@ export function useConversations() {
             other_profile: otherProfile ?? null,
             project: project ?? null,
             display_title: companyName,
+            display_logo: displayLogo,
             subject: projectTitle ? `mbt: ${projectTitle}` : null,
           };
         }),
