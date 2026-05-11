@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 import { useCompanyGate } from "@/lib/companyGate";
+import { uploadAttachments, validateAttachment } from "@/lib/attachments";
 
 export const Route = createFileRoute("/_app/plaats-opdracht")({
   component: PlaatsOpdracht,
@@ -73,30 +74,16 @@ function PlaatsOpdracht() {
     }
 
     const projectId = data.id;
-    const visMap: Record<UploadedFile["visibility"], string> = {
-      "publiek": "public",
-      "na-contact": "after-contact",
-      "prive": "private",
-    };
-    const failed: string[] = [];
+    // Validate files client-side first
     for (const item of attachments) {
-      const safe = item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${user.id}/${projectId}/${Date.now()}-${safe}`;
-      const up = await supabase.storage.from("project-files").upload(path, item.file, {
-        contentType: item.file.type || undefined,
-        upsert: false,
-      });
-      if (up.error) { failed.push(item.file.name); continue; }
-      const { data: pub } = supabase.storage.from("project-files").getPublicUrl(up.data.path);
-      const { error: insErr } = await supabase.from("project_files").insert({
-        project_id: projectId,
-        file_url: pub.publicUrl,
-        file_name: item.file.name,
-        file_type: item.file.type || null,
-        visibility: visMap[item.visibility],
-      });
-      if (insErr) failed.push(item.file.name);
+      const v = validateAttachment(item.file);
+      if (v) { toast.error(v); setSubmitting(false); return; }
     }
+    const { failed } = await uploadAttachments(
+      attachments.map((a) => a.file),
+      user.id,
+      { projectId },
+    );
 
     setSubmitting(false);
     if (failed.length) {

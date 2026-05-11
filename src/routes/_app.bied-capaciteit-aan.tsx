@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 import { useCompanyGate } from "@/lib/companyGate";
+import { uploadAttachments, validateAttachment } from "@/lib/attachments";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
@@ -38,8 +39,12 @@ function BiedCapaciteitAan() {
     if (!specialisation) { toast.error("Kies een categorie."); return; }
     if (!region) { toast.error("Kies een provincie."); return; }
     if (!availableFrom) { toast.error("Kies een beschikbaarheidsdatum."); return; }
+    for (const item of files) {
+      const v = validateAttachment(item.file);
+      if (v) { toast.error(v); return; }
+    }
     setSubmitting(true);
-    const { error } = await supabase.from("capacity_posts").insert({
+    const { data: inserted, error } = await supabase.from("capacity_posts").insert({
       created_by: user.id,
       company_id: myCompanyId,
       title: title.trim(),
@@ -49,13 +54,23 @@ function BiedCapaciteitAan() {
       available_from: availableFrom || null,
       capacity_type: "hourly_rate",
       capacity_value: rate ? Number(rate) : null,
-    });
-    setSubmitting(false);
-    if (error) {
-      toast.error(error.message);
+    }).select("id").single();
+    if (error || !inserted) {
+      setSubmitting(false);
+      toast.error(error?.message ?? "Kon niet opslaan.");
       return;
     }
-    toast.success(publish ? "Capaciteit gepubliceerd." : "Concept opgeslagen.");
+    const { failed } = await uploadAttachments(
+      files.map((f) => f.file),
+      user.id,
+      { capacityPostId: inserted.id },
+    );
+    setSubmitting(false);
+    if (failed.length) {
+      toast.warning(`Opgeslagen, maar ${failed.length} bestand(en) faalden: ${failed.join(", ")}`);
+    } else {
+      toast.success(publish ? "Capaciteit gepubliceerd." : "Concept opgeslagen.");
+    }
     navigate({ to: "/mijn-publicaties" });
   };
 

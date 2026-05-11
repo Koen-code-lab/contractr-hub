@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { AttachmentsEditor } from "@/components/AttachmentsEditor";
 
 export const Route = createFileRoute("/_app/opdracht_/$projectId/edit")({
   component: EditOpdracht,
@@ -164,6 +165,10 @@ function EditOpdracht() {
           </button>
         </div>
       </form>
+
+      <div className="max-w-3xl mt-6">
+        <AttachmentsEditor projectId={projectId} userId={user.id} />
+      </div>
     </>
   );
 }

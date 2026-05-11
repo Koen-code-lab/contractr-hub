@@ -20,6 +20,8 @@ import {
 import { useConnections } from "@/lib/queries";
 import { useCompanyGate } from "@/lib/companyGate";
 import { toast } from "sonner";
+import { fetchAttachmentsForProject } from "@/lib/attachments";
+import { AttachmentsViewer } from "@/components/AttachmentsViewer";
 
 export const Route = createFileRoute("/_app/opdracht/$projectId")({
   component: OpdrachtDetail,
@@ -94,6 +96,12 @@ function OpdrachtDetail() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Attachments (Bijlagen)
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["attachments", "project", projectId],
+    queryFn: () => fetchAttachmentsForProject(projectId),
   });
 
   // Owner: list of interested companies
@@ -333,6 +341,8 @@ function OpdrachtDetail() {
           <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{data.description}</p>
         </section>
       )}
+
+      <AttachmentsViewer attachments={attachments} />
 
       {isOwner && (
         <section className="bg-card rounded-2xl border border-border p-6 shadow-card">
