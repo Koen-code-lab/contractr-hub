@@ -15,7 +15,7 @@ function Login() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const target = redirect && redirect.startsWith("/") ? redirect : "/dashboard";
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
