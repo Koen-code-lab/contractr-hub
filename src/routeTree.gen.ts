@@ -24,7 +24,7 @@ import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
 import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
 import { Route as AppOpdrachtProjectIdRouteImport } from './routes/_app.opdracht.$projectId'
 import { Route as AppBedrijvenCompanyIdRouteImport } from './routes/_app.bedrijven.$companyId'
-import { Route as AppOpdrachtProjectIdEditRouteImport } from './routes/_app.opdracht.$projectId.edit'
+import { Route as AppOpdrachtProjectIdEditRouteImport } from './routes/_app.opdracht_.$projectId.edit'
 import { Route as AppMijnPublicatiesProjectIdEditRouteImport } from './routes/_app.mijn-publicaties.$projectId.edit'
 
 const LoginRoute = LoginRouteImport.update({
@@ -103,9 +103,9 @@ const AppBedrijvenCompanyIdRoute = AppBedrijvenCompanyIdRouteImport.update({
 } as any)
 const AppOpdrachtProjectIdEditRoute =
   AppOpdrachtProjectIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => AppOpdrachtProjectIdRoute,
+    id: '/opdracht_/$projectId/edit',
+    path: '/opdracht/$projectId/edit',
+    getParentRoute: () => AppRoute,
   } as any)
 const AppMijnPublicatiesProjectIdEditRoute =
   AppMijnPublicatiesProjectIdEditRouteImport.update({
@@ -128,7 +128,7 @@ export interface FileRoutesByFullPath {
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
-  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRouteWithChildren
+  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
   '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
@@ -146,7 +146,7 @@ export interface FileRoutesByTo {
   '/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
-  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRouteWithChildren
+  '/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
   '/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
@@ -166,9 +166,9 @@ export interface FileRoutesById {
   '/_app/plaats-opdracht': typeof AppPlaatsOpdrachtRoute
   '/_app/zoek-capaciteit': typeof AppZoekCapaciteitRoute
   '/_app/bedrijven/$companyId': typeof AppBedrijvenCompanyIdRoute
-  '/_app/opdracht/$projectId': typeof AppOpdrachtProjectIdRouteWithChildren
+  '/_app/opdracht/$projectId': typeof AppOpdrachtProjectIdRoute
   '/_app/mijn-publicaties/$projectId/edit': typeof AppMijnPublicatiesProjectIdEditRoute
-  '/_app/opdracht/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
+  '/_app/opdracht_/$projectId/edit': typeof AppOpdrachtProjectIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -225,7 +225,7 @@ export interface FileRouteTypes {
     | '/_app/bedrijven/$companyId'
     | '/_app/opdracht/$projectId'
     | '/_app/mijn-publicaties/$projectId/edit'
-    | '/_app/opdracht/$projectId/edit'
+    | '/_app/opdracht_/$projectId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -341,12 +341,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBedrijvenCompanyIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/opdracht/$projectId/edit': {
-      id: '/_app/opdracht/$projectId/edit'
-      path: '/edit'
+    '/_app/opdracht_/$projectId/edit': {
+      id: '/_app/opdracht_/$projectId/edit'
+      path: '/opdracht/$projectId/edit'
       fullPath: '/opdracht/$projectId/edit'
       preLoaderRoute: typeof AppOpdrachtProjectIdEditRouteImport
-      parentRoute: typeof AppOpdrachtProjectIdRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/mijn-publicaties/$projectId/edit': {
       id: '/_app/mijn-publicaties/$projectId/edit'
@@ -369,17 +369,6 @@ const AppMijnPublicatiesRouteChildren: AppMijnPublicatiesRouteChildren = {
 const AppMijnPublicatiesRouteWithChildren =
   AppMijnPublicatiesRoute._addFileChildren(AppMijnPublicatiesRouteChildren)
 
-interface AppOpdrachtProjectIdRouteChildren {
-  AppOpdrachtProjectIdEditRoute: typeof AppOpdrachtProjectIdEditRoute
-}
-
-const AppOpdrachtProjectIdRouteChildren: AppOpdrachtProjectIdRouteChildren = {
-  AppOpdrachtProjectIdEditRoute: AppOpdrachtProjectIdEditRoute,
-}
-
-const AppOpdrachtProjectIdRouteWithChildren =
-  AppOpdrachtProjectIdRoute._addFileChildren(AppOpdrachtProjectIdRouteChildren)
-
 interface AppRouteChildren {
   AppBekijkOpdrachtenRoute: typeof AppBekijkOpdrachtenRoute
   AppBerichtenRoute: typeof AppBerichtenRoute
@@ -392,7 +381,8 @@ interface AppRouteChildren {
   AppPlaatsOpdrachtRoute: typeof AppPlaatsOpdrachtRoute
   AppZoekCapaciteitRoute: typeof AppZoekCapaciteitRoute
   AppBedrijvenCompanyIdRoute: typeof AppBedrijvenCompanyIdRoute
-  AppOpdrachtProjectIdRoute: typeof AppOpdrachtProjectIdRouteWithChildren
+  AppOpdrachtProjectIdRoute: typeof AppOpdrachtProjectIdRoute
+  AppOpdrachtProjectIdEditRoute: typeof AppOpdrachtProjectIdEditRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -407,7 +397,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppPlaatsOpdrachtRoute: AppPlaatsOpdrachtRoute,
   AppZoekCapaciteitRoute: AppZoekCapaciteitRoute,
   AppBedrijvenCompanyIdRoute: AppBedrijvenCompanyIdRoute,
-  AppOpdrachtProjectIdRoute: AppOpdrachtProjectIdRouteWithChildren,
+  AppOpdrachtProjectIdRoute: AppOpdrachtProjectIdRoute,
+  AppOpdrachtProjectIdEditRoute: AppOpdrachtProjectIdEditRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -420,3 +411,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

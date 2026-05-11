@@ -9,7 +9,7 @@ import { BELGIAN_REGIONS } from "@/lib/regions";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/opdracht/$projectId/edit")({
+export const Route = createFileRoute("/_app/opdracht_/$projectId/edit")({
   component: EditOpdracht,
 });
 
