@@ -23,23 +23,22 @@ export async function getMyCompanyId(myId: string): Promise<string | null> {
 
 /**
  * Find or create a conversation targeted at a company.
- * If the company has a contact user, also link that user as participant_b
- * so they get the conversation in their inbox immediately.
- * If not, the conversation is company-targeted only — any member of the
- * target company can claim/respond via RLS.
+ * Optionally tied to a specific project.
  */
 export async function getOrCreateCompanyConversation(
   myId: string,
   companyId: string,
+  projectId?: string | null,
 ): Promise<string> {
-  // Existing conversation targeted at this company by me
-  const { data: existing, error: findErr } = await supabase
+  // Existing conversation targeted at this company by me (and same project if provided)
+  let findQ = supabase
     .from("conversations")
     .select("id")
     .eq("participant_a", myId)
-    .eq("target_company_id", companyId)
-    .limit(1)
-    .maybeSingle();
+    .eq("target_company_id", companyId);
+  if (projectId) findQ = findQ.eq("project_id", projectId);
+  else findQ = findQ.is("project_id", null);
+  const { data: existing, error: findErr } = await findQ.limit(1).maybeSingle();
   if (findErr) throw findErr;
   if (existing) return existing.id;
 
@@ -52,18 +51,70 @@ export async function getOrCreateCompanyConversation(
     .limit(1)
     .maybeSingle();
 
+  const payload: Record<string, unknown> = {
+    participant_a: myId,
+    participant_b: rep?.id ?? null,
+    target_company_id: companyId,
+  };
+  if (projectId) payload.project_id = projectId;
+
   const { data: created, error: createErr } = await supabase
     .from("conversations")
-    .insert({
-      participant_a: myId,
-      participant_b: rep?.id ?? null,
-      target_company_id: companyId,
-    })
+    .insert(payload as never)
     .select("id")
     .single();
   if (createErr) throw createErr;
   return created.id;
 }
+
+/** Create a project_interests record (idempotent on (project_id, interested_user_id)). */
+export async function createProjectInterest(params: {
+  projectId: string;
+  interestedUserId: string;
+  interestedCompanyId: string | null;
+  ownerUserId: string;
+  ownerCompanyId: string | null;
+  message?: string | null;
+}) {
+  const { error } = await supabase
+    .from("project_interests" as never)
+    .upsert(
+      {
+        project_id: params.projectId,
+        interested_user_id: params.interestedUserId,
+        interested_company_id: params.interestedCompanyId,
+        owner_user_id: params.ownerUserId,
+        owner_company_id: params.ownerCompanyId,
+        message: params.message ?? null,
+        status: "interested",
+      } as never,
+      { onConflict: "project_id,interested_user_id" } as never,
+    );
+  if (error) throw error;
+}
+
+export async function hasMyProjectInterest(projectId: string, myId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("project_interests" as never)
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("interested_user_id", myId)
+    .limit(1)
+    .maybeSingle();
+  return !!data;
+}
+
+export type ProjectInterestRow = {
+  id: string;
+  project_id: string;
+  interested_user_id: string;
+  interested_company_id: string | null;
+  owner_user_id: string;
+  owner_company_id: string | null;
+  status: string;
+  message: string | null;
+  created_at: string;
+};
 
 /**
  * Request a connection between my company and another company.
