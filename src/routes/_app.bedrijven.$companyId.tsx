@@ -21,6 +21,7 @@ import {
 } from "@/lib/connections";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useCompanyGate } from "@/lib/companyGate";
 
 export const Route = createFileRoute("/_app/bedrijven/$companyId")({
   component: CompanyProfile,
@@ -38,6 +39,7 @@ function CompanyProfile() {
   const connections = useConnections();
   const [busy, setBusy] = useState<"connect" | "message" | null>(null);
   const [myCompanyId, setMyCompanyId] = useState<string | null>(null);
+  const { requireCompany } = useCompanyGate();
 
   useEffect(() => {
     if (!user) return;
@@ -60,6 +62,7 @@ function CompanyProfile() {
 
   const handleConnect = async () => {
     if (!user) { toast.error("Log in om te verbinden."); return; }
+    if (!requireCompany()) return;
     setBusy("connect");
     try {
       await requestCompanyConnection(user.id, companyId);
@@ -72,6 +75,7 @@ function CompanyProfile() {
 
   const handleMessage = async () => {
     if (!user) { toast.error("Log in om te berichten."); return; }
+    if (!requireCompany()) return;
     setBusy("message");
     try {
       await getOrCreateCompanyConversation(user.id, companyId);
