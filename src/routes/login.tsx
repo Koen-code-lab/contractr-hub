@@ -37,10 +37,16 @@ function Login() {
         const { error } = await signIn(email, password);
         if (error) setError(error.message);
         else navigate({ to: target, replace: true });
-      } else {
+      } else if (mode === "register") {
         const { error } = await signUp(email, password, fullName);
         if (error) setError(error.message);
         else setInfo("Account aangemaakt. Controleer je e-mail om je adres te bevestigen.");
+      } else {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) setError(error.message);
+        else setInfo("Als dit e-mailadres bestaat, hebben we een herstellink verzonden. Controleer je inbox.");
       }
     } finally {
       setSubmitting(false);
