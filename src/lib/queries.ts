@@ -259,11 +259,11 @@ export function useConversations() {
 
       const [companiesRes, profilesRes, projectsRes] = await Promise.all([
         companyIds.length
-          ? supabase.from("companies").select("id, name").in("id", companyIds)
-          : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+          ? supabase.from("companies").select("id, name, logo_url").in("id", companyIds)
+          : Promise.resolve({ data: [] as { id: string; name: string; logo_url: string | null }[] }),
         profileIds.length
-          ? supabase.from("profiles").select("id, full_name, company_id").in("id", profileIds)
-          : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null }[] }),
+          ? supabase.from("profiles").select("id, full_name, company_id, avatar_url").in("id", profileIds)
+          : Promise.resolve({ data: [] as { id: string; full_name: string | null; company_id: string | null; avatar_url: string | null }[] }),
         projectIds.length
           ? supabase.from("projects").select("id, title").in("id", projectIds)
           : Promise.resolve({ data: [] as { id: string; title: string }[] }),
@@ -289,6 +289,11 @@ export function useConversations() {
           const project = pid ? projectMap.get(pid) ?? null : null;
           const companyName = targetCompany?.name ?? otherCompany?.name ?? otherProfile?.full_name ?? "Gesprek";
           const projectTitle = project?.title?.replace(/[\s.,;:!?]+$/u, "").trim() ?? null;
+          const displayLogo =
+            (targetCompany as { logo_url?: string | null } | null)?.logo_url ??
+            (otherCompany as { logo_url?: string | null } | null)?.logo_url ??
+            (otherProfile as { avatar_url?: string | null } | null)?.avatar_url ??
+            null;
           return {
             ...c,
             last_message: last,
@@ -296,6 +301,7 @@ export function useConversations() {
             other_profile: otherProfile ?? null,
             project: project ?? null,
             display_title: companyName,
+            display_logo: displayLogo,
             subject: projectTitle ? `mbt: ${projectTitle}` : null,
           };
         }),

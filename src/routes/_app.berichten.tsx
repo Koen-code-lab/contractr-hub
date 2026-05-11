@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/States";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/berichten")({
   validateSearch: (s: Record<string, unknown>) => ({ c: typeof s.c === "string" ? s.c : undefined }),
@@ -54,7 +55,7 @@ function Berichten() {
               const title = (c as { display_title?: string }).display_title ?? "Gesprek";
               const subject = (c as { subject?: string | null }).subject ?? null;
               const last = (c as { last_message?: { body: string; created_at: string } | null }).last_message;
-              const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+              const logo = (c as { display_logo?: string | null }).display_logo ?? null;
               return (
                 <button
                   key={c.id}
@@ -62,9 +63,7 @@ function Berichten() {
                   className={`w-full text-left p-4 border-b border-border hover:bg-muted/50 ${isActive ? "bg-muted/40" : ""}`}
                 >
                   <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold shrink-0">
-                      {initials}
-                    </div>
+                    <CompanyAvatar name={title} logoUrl={logo} size="sm" shape="circle" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <div className="font-semibold text-sm truncate">{title}</div>
@@ -95,10 +94,10 @@ function Berichten() {
                 const active = conversations?.find((c) => c.id === currentId);
                 const title = (active as { display_title?: string } | undefined)?.display_title ?? "Gesprek";
                 const subject = (active as { subject?: string | null } | undefined)?.subject ?? null;
-                const initials = title.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+                const logo = (active as { display_logo?: string | null } | undefined)?.display_logo ?? null;
                 return (
                   <div className="p-4 border-b border-border flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">{initials}</div>
+                    <CompanyAvatar name={title} logoUrl={logo} size="sm" shape="circle" />
                     <div>
                       <div className="font-semibold text-sm">{title}</div>
                       {subject && <div className="text-[11px] text-muted-foreground italic">{subject}</div>}

@@ -10,6 +10,7 @@ import {
   useConnections,
 } from "@/lib/queries";
 import { LoadingState, ErrorState, EmptyState } from "@/components/States";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { useAuth } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -106,9 +107,7 @@ function CompanyProfile() {
 
       <div className="bg-card rounded-2xl border border-border shadow-card p-8 mb-6">
         <div className="flex flex-wrap gap-6 items-start">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center text-2xl font-display font-bold shrink-0">
-            {c.name.split(" ").map((s: string) => s[0]).slice(0, 2).join("")}
-          </div>
+          <CompanyAvatar name={c.name} logoUrl={(c as { logo_url?: string | null }).logo_url ?? null} size="xl" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-display font-bold text-2xl">{c.name}</h2>

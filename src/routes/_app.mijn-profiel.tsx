@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/PageHeader";
-import { MapPin, CheckCircle2, Award, Building2, Calendar } from "lucide-react";
+import { MapPin, CheckCircle2, Award, Building2, Calendar, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import {
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/mijn-profiel")({
   component: MijnProfiel,
@@ -71,22 +72,35 @@ function MijnProfiel() {
       <PageHeader title="Mijn profiel" subtitle="Zo zien anderen jou op CONTRACTR." />
 
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden mb-6">
-        <div className="h-44 bg-gradient-to-br from-foreground via-foreground to-foreground/80 relative">
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 70% 30%, oklch(0.83 0.16 90 / 0.4), transparent 50%)" }} />
+        <div className="h-56 bg-gradient-to-br from-foreground via-foreground to-foreground/85 relative">
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 70% 30%, oklch(0.83 0.16 90 / 0.35), transparent 55%)" }} />
+          {/* dark scrim to guarantee text contrast over any background */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         </div>
-        <div className="px-8 pb-8 -mt-16 relative">
+        <div className="px-8 pb-8 -mt-20 relative">
           <div className="flex flex-wrap items-end gap-6 justify-between">
             <div className="flex items-end gap-5">
-              <div className="w-32 h-32 rounded-3xl bg-card border-4 border-card shadow-elevated flex items-center justify-center text-3xl font-display font-bold bg-gradient-to-br from-accent to-accent/70">
-                {initials}
+              <div className="w-32 h-32 rounded-3xl bg-card border-4 border-card shadow-elevated overflow-hidden flex items-center justify-center">
+                {company?.logo_url ? (
+                  <img
+                    src={company.logo_url as string}
+                    alt={`${companyName} logo`}
+                    loading="lazy"
+                    className="w-full h-full object-contain bg-card"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-3xl font-display font-bold bg-gradient-to-br from-accent to-accent/70 text-accent-foreground">
+                    {initials}
+                  </div>
+                )}
               </div>
-              <div className="pb-2" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>
+              <div className="pb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.55)]">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-display font-bold text-white">{profile?.full_name ?? "Mijn naam"}</h2>
                   <CheckCircle2 className="w-5 h-5 text-accent fill-accent/30" />
                 </div>
-                <div className="text-white/80 mt-1">{companyType} · {companyName}</div>
-                <div className="text-sm text-white/70 mt-2 flex flex-wrap gap-4">
+                <div className="text-white/90 mt-1 font-medium">{companyType} · {companyName}</div>
+                <div className="text-sm text-white/85 mt-2 flex flex-wrap gap-4">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {companyCity}</span>
                   {employees != null && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {employees} medewerkers</span>}
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Sinds {profile?.created_at ? new Date(profile.created_at).getFullYear() : "—"}</span>
@@ -194,6 +208,11 @@ function ProfileEditDialog({
   onSaved: () => void;
 }) {
   const { user } = useAuth();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<"logo" | "avatar" | null>(null);
   const [form, setForm] = useState({
     full_name: "",
     company_name: "",
@@ -209,6 +228,8 @@ function ProfileEditDialog({
 
   useEffect(() => {
     if (!open) return;
+    setLogoUrl((company?.logo_url as string | null) ?? null);
+    setAvatarUrl((profile?.avatar_url as string | null) ?? null);
     setForm({
       full_name: profile?.full_name ?? "",
       company_name: company?.name ?? "",
@@ -223,6 +244,35 @@ function ProfileEditDialog({
         .map((p) => `${p.titel} | ${p.waarde} | ${p.jaar}`).join("\n"),
     });
   }, [open, profile, company]);
+
+  const handleImageUpload = async (file: File, kind: "logo" | "avatar") => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Alleen afbeeldingen toegestaan");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Afbeelding te groot (max 5MB)");
+      return;
+    }
+    setUploading(kind);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
+      const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      if (kind === "logo") setLogoUrl(pub.publicUrl);
+      else setAvatarUrl(pub.publicUrl);
+      toast.success(kind === "logo" ? "Logo geüpload" : "Avatar geüpload");
+    } catch (e) {
+      toast.error((e as Error).message ?? "Upload mislukt");
+    } finally {
+      setUploading(null);
+    }
+  };
 
   const save = useMutation({
     mutationFn: async () => {
@@ -247,6 +297,7 @@ function ProfileEditDialog({
         certifications: certs,
         recent_projects: projects,
         description: form.description || null,
+        logo_url: logoUrl,
       };
 
       const companiesTable = supabase.from("companies") as any;
@@ -266,6 +317,7 @@ function ProfileEditDialog({
         full_name: form.full_name || null,
         specialisations: specs,
         region: form.region || null,
+        avatar_url: avatarUrl,
       };
       if (companyId) profilePatch.company_id = companyId;
       console.info("[mijn-profiel] update profile payload", { userId: user.id, profilePatch });
@@ -302,6 +354,46 @@ function ProfileEditDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          <div className="grid grid-cols-2 gap-4">
+            <ImageUploadField
+              label="Bedrijfslogo"
+              value={logoUrl}
+              busy={uploading === "logo"}
+              onPick={() => logoInputRef.current?.click()}
+              onClear={() => setLogoUrl(null)}
+              shape="rounded"
+            />
+            <ImageUploadField
+              label="Profielfoto (avatar)"
+              value={avatarUrl}
+              busy={uploading === "avatar"}
+              onPick={() => avatarInputRef.current?.click()}
+              onClear={() => setAvatarUrl(null)}
+              shape="circle"
+            />
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageUpload(f, "logo");
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageUpload(f, "avatar");
+                e.target.value = "";
+              }}
+            />
+          </div>
           <Field label="Naam">
             <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
           </Field>
@@ -366,6 +458,44 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="space-y-1.5">
       <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
       {children}
+    </div>
+  );
+}
+
+function ImageUploadField({
+  label, value, busy, onPick, onClear, shape,
+}: {
+  label: string;
+  value: string | null;
+  busy: boolean;
+  onPick: () => void;
+  onClear: () => void;
+  shape: "rounded" | "circle";
+}) {
+  const radius = shape === "circle" ? "rounded-full" : "rounded-2xl";
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-3">
+        <div className={`w-20 h-20 ${radius} overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0`}>
+          {value ? (
+            <img src={value} alt={label} className="w-full h-full object-contain bg-card" loading="lazy" />
+          ) : (
+            <Upload className="w-5 h-5 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={onPick} disabled={busy}>
+            {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Upload className="w-3.5 h-3.5 mr-1" />}
+            {value ? "Vervangen" : "Upload"}
+          </Button>
+          {value && (
+            <Button type="button" variant="ghost" size="sm" onClick={onClear} disabled={busy}>
+              Verwijder
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

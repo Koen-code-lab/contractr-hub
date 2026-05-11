@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { MapPin, HardHat, Search, Calendar, Paperclip } from "lucide-react";
+import { MapPin, Search, Calendar, Paperclip } from "lucide-react";
 import { useCapacityPosts, useCapacityAttachmentSummaries, type CapacityFilters } from "@/lib/queries";
 import { formatAttachmentSummary } from "@/lib/attachments";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/zoek-capaciteit")({
   component: ZoekCapaciteit,
@@ -131,13 +132,11 @@ function ZoekCapaciteit() {
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {data?.map((p) => {
-              const company = (p as { company?: { id?: string; name?: string } }).company;
+              const company = (p as { company?: { id?: string; name?: string; logo_url?: string | null } }).company;
               return (
-                <div key={p.id} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-elevated transition-shadow">
+                <div key={p.id} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-elevated hover:-translate-y-0.5 transition-all">
                   <div className="flex items-start justify-between">
-                    <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center">
-                      <HardHat className="w-5 h-5" />
-                    </div>
+                    <CompanyAvatar name={company?.name ?? p.title} logoUrl={company?.logo_url ?? null} size="md" />
                     {p.available_from && (
                       <span className="text-xs px-2 py-1 rounded-full font-medium bg-accent/20 text-accent-foreground">
                         <Calendar className="w-3 h-3 inline mr-1" />

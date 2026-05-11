@@ -16,6 +16,7 @@ import {
 } from "@/lib/connections";
 import { toast } from "sonner";
 import { useCompanyGate } from "@/lib/companyGate";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/mijn-netwerk")({
   component: MijnNetwerk,
@@ -160,11 +161,9 @@ function MijnNetwerk() {
               const status = conn?.status;
               const isBusy = busyId === c.id;
               return (
-                <div key={c.id} className="bg-card rounded-2xl border border-border p-5 shadow-card">
+                <div key={c.id} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-elevated hover:-translate-y-0.5 transition-all">
                   <div className="flex gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-foreground to-foreground/70 text-background flex items-center justify-center font-bold">
-                      {c.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
-                    </div>
+                    <CompanyAvatar name={c.name} logoUrl={(c as { logo_url?: string | null }).logo_url ?? null} size="md" shape="circle" />
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold truncate flex items-center gap-1">
                         {c.name}
