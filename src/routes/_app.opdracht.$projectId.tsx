@@ -18,6 +18,7 @@ import {
   type ProjectInterestRow,
 } from "@/lib/connections";
 import { useConnections } from "@/lib/queries";
+import { useCompanyGate } from "@/lib/companyGate";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/opdracht/$projectId")({
@@ -51,6 +52,7 @@ function OpdrachtDetail() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<"msg" | "connect" | "interest" | null>(null);
+  const { requireCompany } = useCompanyGate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["project", projectId],
@@ -129,6 +131,7 @@ function OpdrachtDetail() {
 
   const handleMessage = async () => {
     if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    if (!requireCompany()) return;
     setBusy("msg");
     try {
       const conversationId = await getOrCreateCompanyConversation(user.id, company.id, projectId);
@@ -151,6 +154,7 @@ function OpdrachtDetail() {
 
   const handleConnect = async () => {
     if (!company?.id || !user) { toast.error("Geen bedrijf gekoppeld."); return; }
+    if (!requireCompany()) return;
     setBusy("connect");
     try {
       await requestCompanyConnection(user.id, company.id);
@@ -162,6 +166,7 @@ function OpdrachtDetail() {
 
   const handleInterest = async () => {
     if (!user) { toast.error("Niet ingelogd."); return; }
+    if (!requireCompany()) return;
     setBusy("interest");
     try {
       const myCompanyId = await getMyCompanyId(user.id);
@@ -242,24 +247,34 @@ function OpdrachtDetail() {
               </Link>
             ) : (
               <div className="flex flex-wrap gap-2 justify-end">
-                <button
-                  onClick={handleInterest}
-                  disabled={busy !== null || !!alreadyInterested}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-60"
-                >
-                  {alreadyInterested ? (<><Check className="w-4 h-4" /> Interesse verstuurd</>) : (<><Sparkles className="w-4 h-4" /> Interesse tonen</>)}
-                </button>
-                <button onClick={handleMessage} disabled={busy !== null} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
-                  <MessageSquare className="w-4 h-4" /> Bericht
-                </button>
-                <button
-                  onClick={handleConnect}
-                  disabled={busy !== null || connStatus !== "none"}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-60"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {connStatus === "accepted" ? "Verbonden" : connStatus === "pending" ? "Verzoek verzonden" : "Verbind"}
-                </button>
+                {(() => {
+                  const orphan = !company?.id;
+                  const orphanTitle = orphan ? "Bedrijfsprofiel ontbreekt" : undefined;
+                  return (
+                    <>
+                      <button
+                        onClick={handleInterest}
+                        disabled={busy !== null || !!alreadyInterested || orphan}
+                        title={orphanTitle}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-60"
+                      >
+                        {alreadyInterested ? (<><Check className="w-4 h-4" /> Interesse verstuurd</>) : (<><Sparkles className="w-4 h-4" /> Interesse tonen</>)}
+                      </button>
+                      <button onClick={handleMessage} disabled={busy !== null || orphan} title={orphanTitle} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+                        <MessageSquare className="w-4 h-4" /> Bericht
+                      </button>
+                      <button
+                        onClick={handleConnect}
+                        disabled={busy !== null || connStatus !== "none" || orphan}
+                        title={orphanTitle}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium disabled:opacity-60"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        {connStatus === "accepted" ? "Verbonden" : connStatus === "pending" ? "Verzoek verzonden" : "Verbind"}
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>

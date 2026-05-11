@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { useCompanyGate } from "@/lib/companyGate";
 
 export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
   component: BiedCapaciteitAan,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_app/bied-capaciteit-aan")({
 function BiedCapaciteitAan() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireCompany } = useCompanyGate();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [title, setTitle] = useState("");
   const [specialisation, setSpecialisation] = useState("Ruwbouw");
@@ -30,6 +32,8 @@ function BiedCapaciteitAan() {
       toast.error("Log in om capaciteit aan te bieden.");
       return;
     }
+    const myCompanyId = requireCompany();
+    if (!myCompanyId) return;
     if (!title.trim()) { toast.error("Geef je publicatie een titel."); return; }
     if (!specialisation) { toast.error("Kies een categorie."); return; }
     if (!region) { toast.error("Kies een provincie."); return; }
@@ -37,6 +41,7 @@ function BiedCapaciteitAan() {
     setSubmitting(true);
     const { error } = await supabase.from("capacity_posts").insert({
       created_by: user.id,
+      company_id: myCompanyId,
       title: title.trim(),
       description: description.trim() || null,
       specialisation,
