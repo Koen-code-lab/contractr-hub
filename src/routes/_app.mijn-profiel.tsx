@@ -275,9 +275,8 @@ function ProfileEditDialog({
         .eq("id", user.id)
         .maybeSingle();
       const { data: savedProfile, error: pErr } = existing
-        ? await supabase.from("profiles").update(profilePatch).eq("id", user.id).select("*").maybeSingle()
-        : await supabase
-            .from("profiles")
+        ? await profilesTable.update(profilePatch).eq("id", user.id).select("*").maybeSingle()
+        : await profilesTable
             .insert({ id: user.id, ...profilePatch })
             .select("*")
             .maybeSingle();
