@@ -232,6 +232,57 @@ export type Database = {
           },
         ]
       }
+      post_attachments: {
+        Row: {
+          capacity_post_id: string | null
+          created_at: string
+          file_name: string
+          file_type: string | null
+          file_url: string
+          id: string
+          project_id: string | null
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          capacity_post_id?: string | null
+          created_at?: string
+          file_name: string
+          file_type?: string | null
+          file_url: string
+          id?: string
+          project_id?: string | null
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          capacity_post_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          project_id?: string | null
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_attachments_capacity_post_id_fkey"
+            columns: ["capacity_post_id"]
+            isOneToOne: false
+            referencedRelation: "capacity_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_attachments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
