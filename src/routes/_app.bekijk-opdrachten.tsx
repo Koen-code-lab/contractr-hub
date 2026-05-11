@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { Briefcase, MapPin, Calendar, Building2, Circle, Search, Paperclip } from "lucide-react";
+import { MapPin, Calendar, Building2, Circle, Search, Paperclip } from "lucide-react";
 import { useProjects, useProjectAttachmentSummaries, type ProjectFilters } from "@/lib/queries";
 import { formatAttachmentSummary } from "@/lib/attachments";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 type SearchParams = { region?: string; category?: string };
 
