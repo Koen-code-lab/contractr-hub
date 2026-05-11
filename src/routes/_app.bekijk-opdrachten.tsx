@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { Briefcase, MapPin, Calendar, Building2, Circle, Search } from "lucide-react";
-import { useProjects, type ProjectFilters } from "@/lib/queries";
+import { Briefcase, MapPin, Calendar, Building2, Circle, Search, Paperclip } from "lucide-react";
+import { useProjects, useProjectAttachmentSummaries, type ProjectFilters } from "@/lib/queries";
+import { formatAttachmentSummary } from "@/lib/attachments";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 
@@ -46,6 +47,8 @@ function BekijkOpdrachten() {
     setDraft(next); setActive(next);
   }, [search.region, search.category]);
   const { data, isLoading, error } = useProjects(active);
+  const projectIds = (data ?? []).map((p) => p.id);
+  const { data: attachmentSummaries } = useProjectAttachmentSummaries(projectIds);
 
   return (
     <>
@@ -178,6 +181,10 @@ function BekijkOpdrachten() {
                   {o.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {o.location}</span>}
                   {o.deadline && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline {new Date(o.deadline).toLocaleDateString("nl-BE")}</span>}
                   {o.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Start {new Date(o.start_date).toLocaleDateString("nl-BE")}</span>}
+                  {(() => {
+                    const label = formatAttachmentSummary(attachmentSummaries?.get(o.id));
+                    return label ? <span className="flex items-center gap-1.5"><Paperclip className="w-4 h-4" /> {label}</span> : null;
+                  })()}
                 </div>
               </div>
             );

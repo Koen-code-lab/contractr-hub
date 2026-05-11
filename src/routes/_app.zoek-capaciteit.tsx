@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { MapPin, HardHat, Search, Calendar } from "lucide-react";
-import { useCapacityPosts, type CapacityFilters } from "@/lib/queries";
+import { MapPin, HardHat, Search, Calendar, Paperclip } from "lucide-react";
+import { useCapacityPosts, useCapacityAttachmentSummaries, type CapacityFilters } from "@/lib/queries";
+import { formatAttachmentSummary } from "@/lib/attachments";
 import { EmptyState, LoadingState, ErrorState } from "@/components/States";
 import { BELGIAN_REGIONS } from "@/lib/regions";
 
@@ -16,6 +17,8 @@ function ZoekCapaciteit() {
   const [draft, setDraft] = useState<CapacityFilters>({});
   const [active, setActive] = useState<CapacityFilters>({});
   const { data, isLoading, error } = useCapacityPosts(active);
+  const capacityIds = (data ?? []).map((p) => p.id);
+  const { data: attachmentSummaries } = useCapacityAttachmentSummaries(capacityIds);
 
   const toggleSpec = (s: string) =>
     setDraft((d) => {
@@ -144,9 +147,13 @@ function ZoekCapaciteit() {
                   </div>
                   <h3 className="font-semibold mt-4">{p.title}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-2">{company?.name ?? p.description ?? ""}</p>
-                  <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
                     {p.region && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {p.region}</span>}
                     {p.specialisation && <span className="px-2 py-0.5 rounded-full bg-muted">{p.specialisation}</span>}
+                    {(() => {
+                      const label = formatAttachmentSummary(attachmentSummaries?.get(p.id));
+                      return label ? <span className="flex items-center gap-1"><Paperclip className="w-3 h-3" /> {label}</span> : null;
+                    })()}
                   </div>
                   <div className="border-t border-border mt-4 pt-4 flex items-center justify-between">
                     <div className="text-sm font-bold">{p.capacity_value ? `€ ${p.capacity_value}/u` : "Op aanvraag"}</div>

@@ -95,29 +95,52 @@ export async function fetchAttachmentsForCapacity(capacityPostId: string): Promi
   return (data ?? []) as unknown as Attachment[];
 }
 
-export async function fetchAttachmentCounts(params: {
+export type AttachmentSummary = { total: number; images: number; documents: number };
+
+function isImageRow(r: { file_type: string | null; file_name: string }) {
+  return isImageAttachment({ file_type: r.file_type, file_name: r.file_name });
+}
+
+export async function fetchAttachmentSummaries(params: {
   projectIds?: string[];
   capacityPostIds?: string[];
-}): Promise<{ projects: Map<string, number>; capacity: Map<string, number> }> {
-  const projects = new Map<string, number>();
-  const capacity = new Map<string, number>();
+}): Promise<{ projects: Map<string, AttachmentSummary>; capacity: Map<string, AttachmentSummary> }> {
+  const projects = new Map<string, AttachmentSummary>();
+  const capacity = new Map<string, AttachmentSummary>();
+  const bump = (m: Map<string, AttachmentSummary>, key: string, img: boolean) => {
+    const cur = m.get(key) ?? { total: 0, images: 0, documents: 0 };
+    cur.total += 1;
+    if (img) cur.images += 1; else cur.documents += 1;
+    m.set(key, cur);
+  };
   if (params.projectIds?.length) {
     const { data } = await supabase
       .from("post_attachments" as never)
-      .select("project_id")
+      .select("project_id, file_type, file_name")
       .in("project_id", params.projectIds);
-    for (const r of (data ?? []) as { project_id: string }[]) {
-      projects.set(r.project_id, (projects.get(r.project_id) ?? 0) + 1);
+    for (const r of (data ?? []) as { project_id: string; file_type: string | null; file_name: string }[]) {
+      bump(projects, r.project_id, isImageRow(r));
     }
   }
   if (params.capacityPostIds?.length) {
     const { data } = await supabase
       .from("post_attachments" as never)
-      .select("capacity_post_id")
+      .select("capacity_post_id, file_type, file_name")
       .in("capacity_post_id", params.capacityPostIds);
-    for (const r of (data ?? []) as { capacity_post_id: string }[]) {
-      capacity.set(r.capacity_post_id, (capacity.get(r.capacity_post_id) ?? 0) + 1);
+    for (const r of (data ?? []) as { capacity_post_id: string; file_type: string | null; file_name: string }[]) {
+      bump(capacity, r.capacity_post_id, isImageRow(r));
     }
   }
   return { projects, capacity };
+}
+
+export function formatAttachmentSummary(s: AttachmentSummary | undefined): string | null {
+  if (!s || s.total === 0) return null;
+  if (s.images > 0 && s.documents === 0) {
+    return s.images === 1 ? "1 foto" : `${s.images} foto's`;
+  }
+  if (s.documents > 0 && s.images === 0) {
+    return s.documents === 1 ? "1 document" : `${s.documents} documenten`;
+  }
+  return s.total === 1 ? "1 bijlage" : `${s.total} bijlagen`;
 }
