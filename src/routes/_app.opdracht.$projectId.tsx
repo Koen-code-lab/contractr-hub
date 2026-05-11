@@ -76,6 +76,25 @@ function OpdrachtDetail() {
   const { data: connections } = useConnections();
 
   const isOwner = !!user && !!data && user.id === data.created_by;
+  const projectCompanyId =
+    (data as { company_id?: string | null } | null | undefined)?.company_id ?? null;
+  const joinedCompany =
+    (data as { company?: { id: string; name: string } | null } | null | undefined)?.company ?? null;
+
+  // Fallback: if relation didn't load but company_id is set, fetch separately
+  const { data: fallbackCompany } = useQuery({
+    queryKey: ["company-fallback", projectCompanyId],
+    enabled: !!projectCompanyId && !joinedCompany,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("id", projectCompanyId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Owner: list of interested companies
   const { data: interests } = useQuery({
