@@ -22,6 +22,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBiedCapaciteitAanRouteImport } from './routes/_app.bied-capaciteit-aan'
 import { Route as AppBerichtenRouteImport } from './routes/_app.berichten'
 import { Route as AppBekijkOpdrachtenRouteImport } from './routes/_app.bekijk-opdrachten'
+import { Route as AppBedrijfAanmakenRouteImport } from './routes/_app.bedrijf-aanmaken'
 import { Route as AppOpdrachtProjectIdRouteImport } from './routes/_app.opdracht.$projectId'
 import { Route as AppBedrijvenCompanyIdRouteImport } from './routes/_app.bedrijven.$companyId'
 import { Route as AppOpdrachtProjectIdEditRouteImport } from './routes/_app.opdracht_.$projectId.edit'
@@ -90,6 +91,11 @@ const AppBekijkOpdrachtenRoute = AppBekijkOpdrachtenRouteImport.update({
   path: '/bekijk-opdrachten',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBedrijfAanmakenRoute = AppBedrijfAanmakenRouteImport.update({
+  id: '/bedrijf-aanmaken',
+  path: '/bedrijf-aanmaken',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOpdrachtProjectIdRoute = AppOpdrachtProjectIdRouteImport.update({
   id: '/opdracht/$projectId',
   path: '/opdracht/$projectId',
@@ -110,6 +116,7 @@ const AppOpdrachtProjectIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/bedrijf-aanmaken': typeof AppBedrijfAanmakenRoute
   '/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
   '/berichten': typeof AppBerichtenRoute
   '/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/bedrijf-aanmaken': typeof AppBedrijfAanmakenRoute
   '/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
   '/berichten': typeof AppBerichtenRoute
   '/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/bedrijf-aanmaken': typeof AppBedrijfAanmakenRoute
   '/_app/bekijk-opdrachten': typeof AppBekijkOpdrachtenRoute
   '/_app/berichten': typeof AppBerichtenRoute
   '/_app/bied-capaciteit-aan': typeof AppBiedCapaciteitAanRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/bedrijf-aanmaken'
     | '/bekijk-opdrachten'
     | '/berichten'
     | '/bied-capaciteit-aan'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/bedrijf-aanmaken'
     | '/bekijk-opdrachten'
     | '/berichten'
     | '/bied-capaciteit-aan'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/_app/bedrijf-aanmaken'
     | '/_app/bekijk-opdrachten'
     | '/_app/berichten'
     | '/_app/bied-capaciteit-aan'
@@ -314,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBekijkOpdrachtenRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/bedrijf-aanmaken': {
+      id: '/_app/bedrijf-aanmaken'
+      path: '/bedrijf-aanmaken'
+      fullPath: '/bedrijf-aanmaken'
+      preLoaderRoute: typeof AppBedrijfAanmakenRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/opdracht/$projectId': {
       id: '/_app/opdracht/$projectId'
       path: '/opdracht/$projectId'
@@ -339,6 +358,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppBedrijfAanmakenRoute: typeof AppBedrijfAanmakenRoute
   AppBekijkOpdrachtenRoute: typeof AppBekijkOpdrachtenRoute
   AppBerichtenRoute: typeof AppBerichtenRoute
   AppBiedCapaciteitAanRoute: typeof AppBiedCapaciteitAanRoute
@@ -355,6 +375,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBedrijfAanmakenRoute: AppBedrijfAanmakenRoute,
   AppBekijkOpdrachtenRoute: AppBekijkOpdrachtenRoute,
   AppBerichtenRoute: AppBerichtenRoute,
   AppBiedCapaciteitAanRoute: AppBiedCapaciteitAanRoute,
