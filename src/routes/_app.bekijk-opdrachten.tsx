@@ -47,6 +47,8 @@ function BekijkOpdrachten() {
     setDraft(next); setActive(next);
   }, [search.region, search.category]);
   const { data, isLoading, error } = useProjects(active);
+  const projectIds = (data ?? []).map((p) => p.id);
+  const { data: attachmentSummaries } = useProjectAttachmentSummaries(projectIds);
 
   return (
     <>
