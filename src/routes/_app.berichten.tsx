@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/States";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 
 export const Route = createFileRoute("/_app/berichten")({
   validateSearch: (s: Record<string, unknown>) => ({ c: typeof s.c === "string" ? s.c : undefined }),
