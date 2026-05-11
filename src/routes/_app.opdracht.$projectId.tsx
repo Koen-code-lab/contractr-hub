@@ -20,6 +20,8 @@ import {
 import { useConnections } from "@/lib/queries";
 import { useCompanyGate } from "@/lib/companyGate";
 import { toast } from "sonner";
+import { fetchAttachmentsForProject } from "@/lib/attachments";
+import { AttachmentsViewer } from "@/components/AttachmentsViewer";
 
 export const Route = createFileRoute("/_app/opdracht/$projectId")({
   component: OpdrachtDetail,
