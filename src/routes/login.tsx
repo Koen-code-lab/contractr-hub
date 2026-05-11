@@ -106,10 +106,14 @@ function Login() {
           </div>
 
           <h2 className="text-3xl font-display font-bold tracking-tight">
-            {mode === "login" ? "Welkom terug" : "Maak je account"}
+            {mode === "login" ? "Welkom terug" : mode === "register" ? "Maak je account" : "Wachtwoord vergeten?"}
           </h2>
           <p className="text-muted-foreground mt-2">
-            {mode === "login" ? "Log in om verder te gaan op CONTRACTR." : "Word lid van het netwerk voor de Belgische bouw."}
+            {mode === "login"
+              ? "Log in om verder te gaan op CONTRACTR."
+              : mode === "register"
+                ? "Word lid van het netwerk voor de Belgische bouw."
+                : "Vul je e-mailadres in en we sturen je een herstellink."}
           </p>
 
           <form className="mt-8 space-y-4" onSubmit={onSubmit}>
@@ -135,18 +139,31 @@ function Login() {
                 className="w-full h-12 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium block mb-2">Wachtwoord</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full h-12 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Wachtwoord</label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => { setMode("forgot"); setError(null); setInfo(null); }}
+                      className="text-xs text-muted-foreground hover:text-foreground underline"
+                    >
+                      Wachtwoord vergeten?
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full h-12 px-4 rounded-xl bg-muted text-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            )}
 
             {error && <div className="text-sm text-destructive">{error}</div>}
             {info && <div className="text-sm text-success">{info}</div>}
@@ -156,9 +173,25 @@ function Login() {
               disabled={submitting}
               className="w-full h-12 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-60"
             >
-              {submitting ? "Even geduld…" : mode === "login" ? "Inloggen" : "Account aanmaken"}
+              {submitting
+                ? "Even geduld…"
+                : mode === "login"
+                  ? "Inloggen"
+                  : mode === "register"
+                    ? "Account aanmaken"
+                    : "Stuur herstellink"}
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            {mode === "forgot" && (
+              <button
+                type="button"
+                onClick={() => { setMode("login"); setError(null); setInfo(null); }}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
+              >
+                Terug naar inloggen
+              </button>
+            )}
           </form>
 
           <div className="mt-8 text-center text-sm text-muted-foreground">
