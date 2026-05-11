@@ -1,6 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { fetchAttachmentSummaries, type AttachmentSummary } from "@/lib/attachments";
+
+export function useProjectAttachmentSummaries(projectIds: string[]) {
+  const key = [...projectIds].sort().join(",");
+  return useQuery({
+    queryKey: ["attachment-summaries", "projects", key],
+    enabled: projectIds.length > 0,
+    queryFn: async () => {
+      const { projects } = await fetchAttachmentSummaries({ projectIds });
+      return projects;
+    },
+  });
+}
+
+export function useCapacityAttachmentSummaries(capacityPostIds: string[]) {
+  const key = [...capacityPostIds].sort().join(",");
+  return useQuery({
+    queryKey: ["attachment-summaries", "capacity", key],
+    enabled: capacityPostIds.length > 0,
+    queryFn: async () => {
+      const { capacity } = await fetchAttachmentSummaries({ capacityPostIds });
+      return capacity;
+    },
+  });
+}
+
+export type { AttachmentSummary };
 
 export type ProjectFilters = {
   category?: string;
